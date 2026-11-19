@@ -3,16 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quest & Partner To-Do | 相棒育成型タスク管理</title>
-    <!-- Tailwind CSSの読み込み -->
+    <title>Quest & Partner To-Do | 習慣チャレンジ＆フレンド対戦</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <script>
@@ -22,13 +18,6 @@
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'Noto Sans JP', 'sans-serif'],
-                    },
-                    colors: {
-                        slate: {
-                            850: '#151e32',
-                            900: '#0f172a',
-                            950: '#090d16',
-                        }
                     },
                     animation: {
                         'shake': 'shake 0.45s cubic-bezier(.36,.07,.19,.97) both',
@@ -71,16 +60,9 @@
             transform: rotate(-90deg);
             transform-origin: 50% 50%;
         }
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 3px;
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
         .glass-card {
             background: rgba(30, 41, 59, 0.65);
             backdrop-filter: blur(12px);
@@ -97,21 +79,18 @@
 </head>
 <body class="min-h-screen antialiased selection:bg-indigo-500 selection:text-white relative">
 
-    <!-- ダメージ時の画面フラッシュ -->
     <div id="damageOverlay" class="fixed inset-0 pointer-events-none z-50 transition-colors"></div>
-
-    <!-- アイテムドロップ／獲得トースト -->
     <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- 絶望・ペナルティモーダル（相棒がダウン） -->
+    <!-- ペナルティモーダル（相棒ダウン） -->
     <div id="gameOverModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md p-4">
-        <div class="bg-slate-900 border-2 border-rose-600 rounded-2xl max-w-md w-full p-6 text-center shadow-2xl shadow-rose-950/60">
+        <div class="bg-slate-900 border-2 border-rose-600 rounded-2xl max-w-md w-full p-6 text-center shadow-2xl">
             <div class="w-16 h-16 bg-rose-500/20 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i data-lucide="heart-crack" class="w-9 h-9"></i>
             </div>
             <h2 class="text-2xl font-black text-rose-500 tracking-wide mb-2">相棒が力尽きてしまった…</h2>
             <p class="text-slate-300 text-sm mb-5 leading-relaxed">
-                タスクの放置・失敗が続き、相棒のげんき（HP）が0になりました。<br>
+                クエストの失敗が続き、相棒のげんき（HP）が0になりました。<br>
                 <span class="text-rose-400 font-bold">ペナルティ：所持コインが半分になり、相棒が空腹状態になります。</span>
             </p>
             <div class="bg-slate-950/80 border border-rose-500/30 rounded-xl p-4 mb-6 text-left">
@@ -126,13 +105,13 @@
 
     <!-- 進化演出モーダル -->
     <div id="evolveModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 backdrop-blur-md p-4">
-        <div class="bg-slate-900 border-2 border-amber-400 rounded-2xl max-w-md w-full p-6 text-center shadow-2xl shadow-amber-500/20">
+        <div class="bg-slate-900 border-2 border-amber-400 rounded-2xl max-w-md w-full p-6 text-center shadow-2xl">
             <p class="text-xs font-extrabold tracking-widest text-amber-400 uppercase mb-2">EVOLUTION!</p>
             <h2 class="text-2xl font-black text-white mb-4">相棒が進化した！</h2>
             <div id="evolvePreviewIcon" class="w-28 h-28 mx-auto my-4 rounded-full bg-gradient-to-br from-amber-500/30 to-purple-500/30 border border-amber-400/50 flex items-center justify-center text-6xl animate-bounce">
                 🐉
             </div>
-            <p id="evolveNewName" class="text-xl font-extrabold text-amber-300 mb-1">星屑の幼竜</p>
+            <p id="evolveNewName" class="text-xl font-extrabold text-amber-300 mb-1">星屑のベビードラゴン</p>
             <p id="evolveNewDesc" class="text-xs text-slate-300 mb-6">あなたの日々の努力を吸収し、力強い姿へと成長しました！</p>
             <button onclick="closeEvolveModal()" class="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black rounded-xl shadow-lg transition">
                 やったね！
@@ -140,10 +119,54 @@
         </div>
     </div>
 
+    <!-- フレンドコード共有・登録モーダル -->
+    <div id="friendModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h2 class="text-lg font-black text-white flex items-center gap-2">
+                    <i data-lucide="users" class="w-5 h-5 text-indigo-400"></i>
+                    フレンドと相棒・ポイントを見せ合う
+                </h2>
+                <button onclick="closeFriendModal()" class="text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- 自分のプロフィール名＆コード発行 -->
+            <div class="space-y-2.5 bg-slate-950/70 p-4 rounded-xl border border-slate-800">
+                <div class="flex items-center justify-between gap-2">
+                    <label class="text-xs font-bold text-slate-300">あなたのプレイヤー名</label>
+                    <div class="flex items-center gap-1.5">
+                        <input type="text" id="playerNameInput" maxlength="12" placeholder="名前を入力" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-bold text-white w-32 focus:outline-none focus:border-indigo-500">
+                        <button onclick="updatePlayerName()" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg">保存</button>
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-400 pt-1">① 下のボタンで自分の最新ステータスコードをコピーして、LINEやチャットで友達に送ろう！</p>
+                <div class="flex gap-2">
+                    <input type="text" id="myShareCode" readonly class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-[11px] text-slate-300 font-mono">
+                    <button onclick="copyMyShareCode()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shrink-0 flex items-center gap-1">
+                        <i data-lucide="copy" class="w-3.5 h-3.5"></i> コピー
+                    </button>
+                </div>
+            </div>
+
+            <!-- 友達のコードを読み込む -->
+            <div class="space-y-2 bg-slate-950/70 p-4 rounded-xl border border-slate-800">
+                <p class="text-xs font-bold text-slate-300">② 友達から送られてきたコードを貼り付けて追加・更新</p>
+                <div class="flex gap-2">
+                    <input type="text" id="friendCodeInput" placeholder="友達の共有コードをここに貼り付け..." class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                    <button onclick="importFriendCode()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg shrink-0">
+                        追加 / 更新
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- メインコンテナ -->
     <div id="appContainer" class="max-w-6xl mx-auto px-4 py-6 sm:py-8">
         
-        <!-- 上部ヘッダー（所持コイン & 状態） -->
+        <!-- 上部ヘッダー -->
         <header class="glass-card rounded-2xl p-4 sm:px-6 mb-6 flex flex-wrap items-center justify-between gap-4 shadow-xl">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
@@ -151,81 +174,162 @@
                 </div>
                 <div>
                     <h1 class="text-lg sm:text-xl font-black tracking-tight text-white">QUEST & PARTNER</h1>
-                    <p class="text-xs text-slate-400">タスク達成で素材を集め、相棒を育てよう</p>
+                    <p class="text-xs text-slate-400">周期チャレンジで習慣化＆フレンドと競争しよう</p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-2.5">
                 <div id="debuffBadge" class="hidden items-center gap-1.5 bg-rose-500/20 border border-rose-500/40 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-300">
                     <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
-                    <span>空腹ペナルティ中（獲得EXP半減）</span>
+                    <span>空腹ペナルティ中</span>
                 </div>
-                <!-- コイン表示 -->
-                <div class="flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 px-4 py-2 rounded-xl">
-                    <i data-lucide="coins" class="w-5 h-5 text-amber-400"></i>
+
+                <!-- 競争ポイント表示 -->
+                <div class="flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/30 px-3.5 py-2 rounded-xl">
+                    <i data-lucide="trophy" class="w-4 h-4 text-indigo-400"></i>
                     <div>
-                        <p class="text-[10px] text-amber-300/80 font-bold leading-none">COINS</p>
-                        <p id="coinText" class="text-base font-black text-amber-400 leading-tight">100</p>
+                        <p class="text-[10px] text-indigo-300/80 font-bold leading-none">SCORE PT</p>
+                        <p id="scorePtText" class="text-sm font-black text-indigo-300 leading-tight">0</p>
                     </div>
                 </div>
+
+                <!-- コイン表示 -->
+                <div class="flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 px-3.5 py-2 rounded-xl">
+                    <i data-lucide="coins" class="w-4 h-4 text-amber-400"></i>
+                    <div>
+                        <p class="text-[10px] text-amber-300/80 font-bold leading-none">COINS</p>
+                        <p id="coinText" class="text-sm font-black text-amber-400 leading-tight">100</p>
+                    </div>
+                </div>
+
+                <!-- フレンドコードボタン -->
+                <button onclick="openFriendModal()" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition">
+                    <i data-lucide="share-2" class="w-4 h-4 text-emerald-400"></i>
+                    <span>友達と共有</span>
+                </button>
             </div>
         </header>
 
         <!-- メイン2カラムレイアウト -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
-            <!-- 左カラム：クエスト追加＆タスクリスト（7カラム） -->
-            <div class="lg:col-span-7 space-y-6">
+            <!-- 左カラム：クエスト＆習慣チャレンジ（7カラム） -->
+            <div class="lg:col-span-7 space-y-5">
                 
-                <!-- 新規クエスト追加フォーム -->
-                <div class="glass-card rounded-2xl p-5 shadow-lg">
-                    <div class="flex items-center justify-between mb-3">
-                        <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
-                            <i data-lucide="plus-circle" class="w-4 h-4 text-indigo-400"></i>
-                            新しいクエストを追加
-                        </h2>
-                        <span class="text-[11px] text-slate-400">難易度が高いほどレア育成素材がドロップ！</span>
-                    </div>
-                    <form id="taskForm" class="space-y-3">
-                        <input type="text" id="taskTitleInput" required placeholder="例：英単語を20個覚える、部屋の掃除をする..." 
-                            class="w-full bg-slate-950/70 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
-                        
-                        <div class="flex flex-wrap items-center justify-between gap-3">
-                            <!-- 難易度選択 -->
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-slate-400 font-medium">難易度:</span>
-                                <select id="taskDifficultyInput" class="bg-slate-950/80 border border-slate-700 rounded-lg px-3 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-indigo-500">
-                                    <option value="easy">★1 簡単（コイン+20 / 素材ドロップ低）</option>
-                                    <option value="normal" selected>★2 普通（コイン+40 / 素材ドロップ中）</option>
-                                    <option value="hard">★3 難しい（コイン+80 / レア素材確定！）</option>
-                                </select>
+                <!-- モード切り替えタブ（単発クエスト / 周期習慣チャレンジ） -->
+                <div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl">
+                    <button onclick="switchMainTab('habits')" id="tab-habits" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 bg-indigo-600 text-white shadow transition">
+                        <i data-lucide="repeat" class="w-4 h-4"></i>
+                        <span>周期習慣チャレンジ</span>
+                        <span id="habitReadyBadge" class="hidden px-1.5 py-0.5 text-[10px] bg-amber-400 text-slate-950 rounded-full font-black">0</span>
+                    </button>
+                    <button onclick="switchMainTab('oneshot')" id="tab-oneshot" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 text-slate-400 hover:text-white transition">
+                        <i data-lucide="sword" class="w-4 h-4"></i>
+                        <span>単発クエスト</span>
+                    </button>
+                </div>
+
+                <!-- ① 周期習慣チャレンジエリア -->
+                <div id="section-habits" class="space-y-4">
+                    <div class="glass-card rounded-2xl p-5 shadow-lg border-indigo-500/20">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                                <i data-lucide="calendar-clock" class="w-4 h-4 text-indigo-400"></i>
+                                習慣化チャレンジを登録（自動で周期復活！）
+                            </h2>
+                        </div>
+                        <form id="habitForm" class="space-y-3">
+                            <input type="text" id="habitTitleInput" required placeholder="例：英単語を15分やる、筋トレ30回、読書10ページ..." 
+                                class="w-full bg-slate-950/70 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                <!-- 周期（何日おきにやるか） -->
+                                <div>
+                                    <label class="block text-[11px] text-slate-400 font-bold mb-1">挑戦する間隔（周期）</label>
+                                    <select id="habitIntervalInput" class="w-full bg-slate-950/80 border border-slate-700 rounded-lg px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:border-indigo-500">
+                                        <option value="1">毎日（1日ごと）</option>
+                                        <option value="2">1日おき（2日ごと）</option>
+                                        <option value="3" selected>2日おき（3日ごと）</option>
+                                        <option value="5">4日おき（5日ごと）</option>
+                                        <option value="7">週1回（7日ごと）</option>
+                                    </select>
+                                </div>
+
+                                <!-- 目標期間（何日間続けるか） -->
+                                <div>
+                                    <label class="block text-[11px] text-slate-400 font-bold mb-1">チャレンジ期間</label>
+                                    <select id="habitDurationInput" class="w-full bg-slate-950/80 border border-slate-700 rounded-lg px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:border-indigo-500">
+                                        <option value="7">7日間（お試し習慣）</option>
+                                        <option value="14" selected>14日間（2週間定着）</option>
+                                        <option value="21">21日間（3週間マスター）</option>
+                                        <option value="30">30日間（1ヶ月チャレンジ）</option>
+                                    </select>
+                                </div>
+
+                                <!-- 難易度 -->
+                                <div>
+                                    <label class="block text-[11px] text-slate-400 font-bold mb-1">難易度（報酬量）</label>
+                                    <select id="habitDifficultyInput" class="w-full bg-slate-950/80 border border-slate-700 rounded-lg px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:border-indigo-500">
+                                        <option value="easy">★1 簡単 (+30pt)</option>
+                                        <option value="normal" selected>★2 普通 (+60pt)</option>
+                                        <option value="hard">★3 難しい (+120pt)</option>
+                                    </select>
+                                </div>
                             </div>
 
-                            <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold rounded-xl shadow-lg shadow-indigo-600/25 flex items-center gap-1.5 transition transform active:scale-95">
-                                <i data-lucide="sword" class="w-4 h-4"></i>
-                                クエスト受注
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- フィルタータブ -->
-                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-                    <div class="flex gap-2">
-                        <button onclick="setFilter('all')" id="filter-all" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white transition">すべて</button>
-                        <button onclick="setFilter('active')" id="filter-active" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">進行中</button>
-                        <button onclick="setFilter('completed')" id="filter-completed" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">達成済み</button>
+                            <div class="flex justify-end pt-1">
+                                <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs sm:text-sm font-bold rounded-xl shadow-lg flex items-center gap-1.5 transition transform active:scale-95">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    この周期でチャレンジ開始
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    <button onclick="clearCompleted()" class="text-xs text-slate-500 hover:text-slate-300 transition">履歴を整理</button>
+
+                    <!-- 登録済み習慣チャレンジ一覧 -->
+                    <div id="habitList" class="space-y-3">
+                        <!-- JSで描画 -->
+                    </div>
                 </div>
 
-                <!-- タスクリスト本体 -->
-                <div id="taskList" class="space-y-3">
-                    <!-- JSで動的に描画 -->
+                <!-- ② 単発クエストエリア -->
+                <div id="section-oneshot" class="hidden space-y-4">
+                    <div class="glass-card rounded-2xl p-5 shadow-lg">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
+                                <i data-lucide="plus-circle" class="w-4 h-4 text-indigo-400"></i>
+                                単発クエストを追加
+                            </h2>
+                        </div>
+                        <form id="taskForm" class="space-y-3">
+                            <input type="text" id="taskTitleInput" required placeholder="例：部屋の片付け、提出物を出す..." 
+                                class="w-full bg-slate-950/70 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+                            
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-slate-400 font-medium">難易度:</span>
+                                    <select id="taskDifficultyInput" class="bg-slate-950/80 border border-slate-700 rounded-lg px-3 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-indigo-500">
+                                        <option value="easy">★1 簡単 (+20 Coin / +25pt)</option>
+                                        <option value="normal" selected>★2 普通 (+40 Coin / +50pt)</option>
+                                        <option value="hard">★3 難しい (+80 Coin / +100pt)</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold rounded-xl shadow-lg flex items-center gap-1.5 transition">
+                                    <i data-lucide="sword" class="w-4 h-4"></i>
+                                    クエスト受注
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="taskList" class="space-y-3">
+                        <!-- JSで描画 -->
+                    </div>
                 </div>
+
             </div>
 
-            <!-- 右カラム：相棒育成ルーム ＆ 進行度メーター（5カラム） -->
+            <!-- 右カラム：相棒育成 ＆ フレンド広場（5カラム） -->
             <div class="lg:col-span-5 space-y-6">
                 
                 <!-- 相棒キャラクター育成パネル -->
@@ -238,110 +342,73 @@
                         <span id="partnerLevelBadge" class="text-sm font-black text-amber-400">Lv. 1</span>
                     </div>
 
-                    <!-- キャラクター表示ステージ -->
-                    <div class="relative my-3 py-6 rounded-2xl bg-gradient-to-b from-slate-900/90 to-indigo-950/40 border border-slate-800 flex flex-col items-center justify-center">
-                        <!-- セリフ吹き出し -->
-                        <div id="partnerSpeech" class="mb-3 px-3.5 py-1.5 rounded-full bg-slate-800/90 border border-slate-700 text-xs text-slate-200 font-medium shadow">
-                            「クエストを達成してエサをくれると嬉しいな！」
+                    <div class="relative my-3 py-5 rounded-2xl bg-gradient-to-b from-slate-900/90 to-indigo-950/40 border border-slate-800 flex flex-col items-center justify-center">
+                        <div id="partnerSpeech" class="mb-3 px-3.5 py-1.5 rounded-full bg-slate-800/90 border border-slate-700 text-xs text-slate-200 font-medium shadow text-center max-w-[90%]">
+                            「周期チャレンジを達成して一緒に成長しよう！」
                         </div>
 
-                        <!-- キャラクター本体（クリックで撫でる） -->
-                        <button onclick="petPartner()" id="partnerAvatarBtn" title="クリックして撫でる" class="relative w-28 h-28 rounded-full bg-gradient-to-tr from-indigo-500/20 via-purple-500/20 to-amber-500/20 border border-white/10 flex items-center justify-center text-6xl animate-float cursor-pointer hover:scale-105 transition select-none shadow-inner">
+                        <button onclick="petPartner()" id="partnerAvatarBtn" class="relative w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-500/20 via-purple-500/20 to-amber-500/20 border border-white/10 flex items-center justify-center text-5xl animate-float cursor-pointer hover:scale-105 transition select-none shadow-inner">
                             <span id="partnerEmoji">🥚</span>
                         </button>
-                        <p class="text-[10px] text-slate-500 mt-2">タップしてなでる</p>
 
-                        <!-- 進化ボタン（条件達成時に出現） -->
                         <button id="evolveBtn" onclick="evolvePartner()" class="hidden mt-3 px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xs rounded-full animate-pulse-glow shadow-lg transition transform hover:scale-105">
                             ✨ 進化の条件達成！進化させる ✨
                         </button>
                     </div>
 
-                    <!-- 相棒ステータスゲージ（成長EXP ＆ げんきHP） -->
-                    <div class="space-y-3 mb-4">
-                        <!-- 成長EXP -->
+                    <!-- 成長EXP ＆ げんきHP -->
+                    <div class="space-y-2.5 mb-4">
                         <div>
                             <div class="flex justify-between text-xs font-bold mb-1">
                                 <span class="text-indigo-300 flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> 成長度 (EXP)</span>
                                 <span id="partnerExpText" class="text-slate-300">0 / 100</span>
                             </div>
-                            <div class="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                            <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
                                 <div id="partnerExpBar" class="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 transition-all duration-500" style="width: 0%;"></div>
                             </div>
                         </div>
 
-                        <!-- げんき（HP / 失敗ペナルティ連動） -->
                         <div>
                             <div class="flex justify-between text-xs font-bold mb-1">
                                 <span class="text-emerald-400 flex items-center gap-1"><i data-lucide="heart" class="w-3.5 h-3.5"></i> 相棒のげんき (HP)</span>
                                 <span id="partnerHpText" class="text-slate-300">100 / 100</span>
                             </div>
-                            <div class="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                            <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
                                 <div id="partnerHpBar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300" style="width: 100%;"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 育成アイテムインベントリ（タップして相棒に与える） -->
+                    <!-- 育成アイテムインベントリ -->
                     <div class="border-t border-slate-800 pt-3">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                                <i data-lucide="backpack" class="w-3.5 h-3.5 text-amber-400"></i>
-                                育成アイテム（クリックして相棒にあげる）
-                            </h3>
-                        </div>
-                        <div id="inventoryGrid" class="grid grid-cols-3 gap-2">
-                            <!-- JSで描画 -->
-                        </div>
+                        <h3 class="text-xs font-bold text-slate-300 mb-2 flex items-center gap-1.5">
+                            <i data-lucide="backpack" class="w-3.5 h-3.5 text-amber-400"></i>
+                            育成アイテム（タップして相棒にあげる）
+                        </h3>
+                        <div id="inventoryGrid" class="grid grid-cols-3 gap-2"></div>
                     </div>
                 </div>
 
-                <!-- 視覚的な進行度ダッシュボード -->
-                <div class="glass-card rounded-2xl p-5 shadow-lg">
-                    <h2 class="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
-                        <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-400"></i>
-                        クエスト達成進行度
-                    </h2>
-                    
-                    <div class="flex items-center gap-5">
-                        <!-- 円形プログレスバー -->
-                        <div class="relative w-24 h-24 shrink-0 flex items-center justify-center">
-                            <svg class="w-24 h-24" viewBox="0 0 120 120">
-                                <circle class="text-slate-800" stroke-width="10" stroke="currentColor" fill="transparent" r="50" cx="60" cy="60" />
-                                <circle id="progressRing" class="progress-ring__circle text-emerald-400" stroke-width="10" stroke-dasharray="314.159" stroke-dashoffset="314.159" stroke-linecap="round" stroke="currentColor" fill="transparent" r="50" cx="60" cy="60" />
-                            </svg>
-                            <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-                                <span id="progressPercent" class="text-xl font-black text-white">0%</span>
-                            </div>
-                        </div>
-
-                        <!-- ステータス内訳 -->
-                        <div class="flex-1 space-y-2">
-                            <div class="grid grid-cols-3 gap-1.5 text-center">
-                                <div class="bg-slate-950/60 rounded-lg p-2 border border-slate-800">
-                                    <p class="text-[10px] text-slate-400">進行中</p>
-                                    <p id="statActive" class="text-sm font-black text-indigo-400">0</p>
-                                </div>
-                                <div class="bg-slate-950/60 rounded-lg p-2 border border-slate-800">
-                                    <p class="text-[10px] text-slate-400">達成</p>
-                                    <p id="statCompleted" class="text-sm font-black text-emerald-400">0</p>
-                                </div>
-                                <div class="bg-slate-950/60 rounded-lg p-2 border border-slate-800">
-                                    <p class="text-[10px] text-slate-400">失敗</p>
-                                    <p id="statFailed" class="text-sm font-black text-rose-400">0</p>
-                                </div>
-                            </div>
-                            <!-- 積み上げバー -->
-                            <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden flex">
-                                <div id="barCompleted" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
-                                <div id="barFailed" class="bg-rose-500 h-full transition-all duration-500" style="width: 0%"></div>
-                                <div id="barActive" class="bg-indigo-500/50 h-full transition-all duration-500" style="width: 0%"></div>
-                            </div>
-                        </div>
+                <!-- フレンドランキング ＆ 相棒お披露目広場 -->
+                <div class="glass-card rounded-2xl p-5 shadow-lg border-emerald-500/20">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>
+                            フレンドランキング＆相棒広場
+                        </h2>
+                        <button onclick="openFriendModal()" class="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1">
+                            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> 友達を追加/更新
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mb-3">
+                        ポイントを競い合ったり、友達の相棒をタップして「いいね（応援）」を送ろう！
+                    </p>
+                    <div id="friendLeaderboard" class="space-y-2.5">
+                        <!-- JSで描画 -->
                     </div>
                 </div>
 
-                <!-- 育成素材＆現実ご褒美ショップ -->
+                <!-- コイン交換ショップ -->
                 <div class="glass-card rounded-2xl p-5 shadow-lg">
                     <div class="flex items-center justify-between mb-3">
                         <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
@@ -349,12 +416,10 @@
                             コイン交換ショップ
                         </h2>
                         <button onclick="addCustomReward()" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
-                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> 自分ご褒美追加
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> ご褒美追加
                         </button>
                     </div>
-                    <div id="rewardList" class="space-y-2 max-h-60 overflow-y-auto pr-1">
-                        <!-- JSで描画 -->
-                    </div>
+                    <div id="rewardList" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
                 </div>
 
             </div>
@@ -364,73 +429,35 @@
     <script>
         // --- 進化データ定義 ---
         const PARTNER_STAGES = [
-            {
-                stage: 1,
-                name: 'ふしぎなタマゴ',
-                emoji: '🥚',
-                reqLevel: 3,
-                reqStones: 1,
-                desc: '温もりを感じて微かに揺れている謎のタマゴ。'
-            },
-            {
-                stage: 2,
-                name: '星屑のベビードラゴン',
-                emoji: '🐣',
-                reqLevel: 7,
-                reqStones: 2,
-                desc: '殻を破って生まれたばかり！あなたの努力が大好き。'
-            },
-            {
-                stage: 3,
-                name: '蒼穹のウイングドラゴン',
-                emoji: '🐉',
-                reqLevel: 12,
-                reqStones: 3,
-                desc: '立派な翼が生え、空を駆け巡る頼もしい相棒！'
-            },
-            {
-                stage: 4,
-                name: '伝説の星神龍（最終進化）',
-                emoji: '👑',
-                reqLevel: 999,
-                reqStones: 999,
-                desc: '数々のクエストを乗り越えた究極の守護神！'
-            }
+            { stage: 1, name: 'ふしぎなタマゴ', emoji: '🥚', reqLevel: 3, reqStones: 1, desc: '温もりを感じて微かに揺れている謎のタマゴ。' },
+            { stage: 2, name: '星屑のベビードラゴン', emoji: '🐣', reqLevel: 7, reqStones: 2, desc: '殻を破って生まれたばかり！あなたの努力が大好き。' },
+            { stage: 3, name: '蒼穹のウイングドラゴン', emoji: '🐉', reqLevel: 12, reqStones: 3, desc: '立派な翼が生え、空を駆け巡る頼もしい相棒！' },
+            { stage: 4, name: '伝説の星神龍（最終進化）', emoji: '👑', reqLevel: 999, reqStones: 999, desc: '数々のクエストを乗り越えた究極の守護神！' }
         ];
 
         // --- 育成アイテムマスター ---
         const ITEM_MASTER = {
-            shard: {
-                id: 'shard',
-                name: 'ほしのカケラ',
-                emoji: '✨',
-                exp: 35,
-                hp: 5,
-                desc: '経験値+35 / げんき+5'
-            },
-            fruit: {
-                id: 'fruit',
-                name: 'にじいろ果実',
-                emoji: '🍎',
-                exp: 80,
-                hp: 25,
-                desc: '経験値+80 / げんき+25'
-            },
-            stone: {
-                id: 'stone',
-                name: '進化の秘石',
-                emoji: '💎',
-                exp: 50,
-                hp: 10,
-                isEvoItem: true,
-                desc: '進化に必要！ / EXP+50'
-            }
+            shard: { id: 'shard', name: 'ほしのカケラ', emoji: '✨', exp: 35, hp: 5, desc: 'EXP+35 / げんき+5' },
+            fruit: { id: 'fruit', name: 'にじいろ果実', emoji: '🍎', exp: 80, hp: 25, desc: 'EXP+80 / げんき+25' },
+            stone: { id: 'stone', name: '進化の秘石', emoji: '💎', exp: 50, hp: 10, desc: '進化に必要 / EXP+50' }
         };
 
-        // --- 初期状態とデータ管理 ---
+        const DIFFICULTY_CONFIG = {
+            easy:   { label: '★1 簡単', coins: 20, score: 30, hpPenalty: 10, color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' },
+            normal: { label: '★2 普通', coins: 40, score: 60, hpPenalty: 20, color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/30' },
+            hard:   { label: '★3 難しい', coins: 80, score: 120, hpPenalty: 35, color: 'text-amber-400 bg-amber-500/10 border-amber-500/30' }
+        };
+
+        const DAY_MS = 24 * 60 * 60 * 1000;
+
+        // --- 初期状態 ---
         const DEFAULT_STATE = {
+            playerId: 'u_' + Math.random().toString(36).substring(2, 9),
+            playerName: 'あなた',
+            scorePt: 120,
             coins: 100,
             isHungryDebuff: false,
+            activeTab: 'habits',
             partner: {
                 stageIndex: 0,
                 level: 1,
@@ -438,73 +465,100 @@
                 hp: 100,
                 maxHp: 100
             },
-            inventory: {
-                shard: 2,
-                fruit: 1,
-                stone: 0
-            },
+            inventory: { shard: 2, fruit: 1, stone: 0 },
+            // 周期習慣チャレンジ
+            habits: [
+                {
+                    id: 1001,
+                    title: '英単語や勉強を15分進める',
+                    intervalDays: 2,     // 2日ごと（1日おき）
+                    durationDays: 14,    // 14日間チャレンジ
+                    startDate: Date.now(),
+                    nextAvailableAt: Date.now(), // 今すぐ挑戦可能
+                    completedCount: 0,
+                    streak: 0,
+                    difficulty: 'normal'
+                }
+            ],
+            // 単発クエスト
             tasks: [
-                { id: 1, title: '相棒に「ほしのカケラ」を1つあげてみる', difficulty: 'easy', status: 'active' },
-                { id: 2, title: '今日やるべきタスクを1つ追加して達成する', difficulty: 'normal', status: 'active' }
+                { id: 1, title: '相棒に「ほしのカケラ」を1つあげてみる', difficulty: 'easy', status: 'active' }
+            ],
+            // フレンド一覧（初期サンプルライバル1名入り）
+            friends: [
+                {
+                    id: 'sample_rival_1',
+                    name: 'ライバルのハルカ（見本）',
+                    scorePt: 240,
+                    stageIndex: 1,
+                    level: 4,
+                    streakMax: 3,
+                    likes: 2,
+                    updatedAt: Date.now()
+                }
             ],
             rewards: [
                 { id: 101, title: '【素材】にじいろ果実 ×1', cost: 60, type: 'item', itemId: 'fruit' },
                 { id: 102, title: '【素材】進化の秘石 ×1', cost: 150, type: 'item', itemId: 'stone' },
                 { id: 103, title: '【ご褒美】好きなお菓子・ドリンクOK券', cost: 80, type: 'real' },
                 { id: 104, title: '【ご褒美】動画・ゲームを30分満喫する券', cost: 120, type: 'real' }
-            ],
-            filter: 'all'
+            ]
         };
 
-        let state = JSON.parse(localStorage.getItem('questPartnerState_v1')) || DEFAULT_STATE;
-
-        const DIFFICULTY_CONFIG = {
-            easy:   { label: '★1 簡単', coins: 20, hpPenalty: 10, color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' },
-            normal: { label: '★2 普通', coins: 40, hpPenalty: 20, color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/30' },
-            hard:   { label: '★3 難しい', coins: 80, hpPenalty: 35, color: 'text-amber-400 bg-amber-500/10 border-amber-500/30' }
-        };
-
-        const PENALTY_MISSIONS = [
-            '「コップ1杯の水を飲んで、背筋を伸ばす」',
-            '「スマホを置いて5分間だけ目の前の作業に集中する」',
-            '「机の上にある不要なものを1つ片付ける」',
-            '「深呼吸を3回して、次のタスクを1つだけ決める」'
-        ];
+        let state = JSON.parse(localStorage.getItem('questPartnerState_v2')) || DEFAULT_STATE;
 
         function saveState() {
-            localStorage.setItem('questPartnerState_v1', JSON.stringify(state));
+            localStorage.setItem('questPartnerState_v2', JSON.stringify(state));
         }
 
         function getNextLevelExp(level) {
             return level * 100;
         }
 
-        // --- トースト通知 ---
         function showToast(message, icon = '✨', bgClass = 'bg-slate-800 border-indigo-500/50') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = `${bgClass} border text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 text-xs font-bold transform transition-all duration-300 translate-y-2 opacity-0`;
             toast.innerHTML = `<span class="text-base">${icon}</span><span>${message}</span>`;
             container.appendChild(toast);
-            
-            requestAnimationFrame(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            });
-
+            requestAnimationFrame(() => toast.classList.remove('translate-y-2', 'opacity-0'));
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-2');
                 setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            }, 3200);
         }
 
-        // --- 画面描画 ---
+        // --- メインタブ切り替え ---
+        function switchMainTab(tabName) {
+            state.activeTab = tabName;
+            const habitSec = document.getElementById('section-habits');
+            const oneshotSec = document.getElementById('section-oneshot');
+            const tabHabits = document.getElementById('tab-habits');
+            const tabOneshot = document.getElementById('tab-oneshot');
+
+            if (tabName === 'habits') {
+                habitSec.classList.remove('hidden');
+                oneshotSec.classList.add('hidden');
+                tabHabits.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 bg-indigo-600 text-white shadow transition';
+                tabOneshot.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 text-slate-400 hover:text-white transition';
+            } else {
+                habitSec.classList.add('hidden');
+                oneshotSec.classList.remove('hidden');
+                tabOneshot.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 bg-indigo-600 text-white shadow transition';
+                tabHabits.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 text-slate-400 hover:text-white transition';
+            }
+            saveState();
+        }
+
+        // --- 全体描画 ---
         function render() {
             const p = state.partner;
             const stageInfo = PARTNER_STAGES[p.stageIndex];
             const nextExp = getNextLevelExp(p.level);
 
-            // コイン＆デバフ表示
+            document.getElementById('scorePtText').textContent = state.scorePt;
             document.getElementById('coinText').textContent = state.coins;
+
             const debuffBadge = document.getElementById('debuffBadge');
             if (state.isHungryDebuff) {
                 debuffBadge.classList.remove('hidden');
@@ -514,131 +568,537 @@
                 debuffBadge.classList.remove('flex');
             }
 
-            // 相棒情報
+            // 相棒ステータス
             document.getElementById('partnerStageBadge').textContent = `STAGE ${stageInfo.stage}`;
             document.getElementById('partnerName').textContent = stageInfo.name;
             document.getElementById('partnerLevelBadge').textContent = `Lv. ${p.level}`;
             document.getElementById('partnerEmoji').textContent = stageInfo.emoji;
 
-            // 経験値バー
             const expPct = Math.min(100, Math.round((p.exp / nextExp) * 100));
             document.getElementById('partnerExpText').textContent = `${p.exp} / ${nextExp}`;
             document.getElementById('partnerExpBar').style.width = `${expPct}%`;
 
-            // HPバー
             const hpPct = Math.max(0, Math.min(100, Math.round((p.hp / p.maxHp) * 100)));
             document.getElementById('partnerHpText').textContent = `${p.hp} / ${p.maxHp}`;
             const hpBar = document.getElementById('partnerHpBar');
             hpBar.style.width = `${hpPct}%`;
-            if (hpPct <= 30) {
-                hpBar.className = 'h-full bg-rose-500 transition-all duration-300';
-            } else if (hpPct <= 60) {
-                hpBar.className = 'h-full bg-amber-400 transition-all duration-300';
-            } else {
-                hpBar.className = 'h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300';
-            }
+            hpBar.className = hpPct <= 30 ? 'h-full bg-rose-500 transition-all duration-300' :
+                               hpPct <= 60 ? 'h-full bg-amber-400 transition-all duration-300' :
+                               'h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300';
 
-            // 進化ボタン判定
             const evolveBtn = document.getElementById('evolveBtn');
             const canEvolve = p.stageIndex < PARTNER_STAGES.length - 1 &&
                               p.level >= stageInfo.reqLevel &&
                               state.inventory.stone >= stageInfo.reqStones;
-            if (canEvolve) {
-                evolveBtn.classList.remove('hidden');
-            } else {
-                evolveBtn.classList.add('hidden');
-            }
+            evolveBtn.classList.toggle('hidden', !canEvolve);
 
-            renderInventory();
+            renderHabits();
             renderTasks();
-            renderProgress();
+            renderInventory();
+            renderFriends();
             renderRewards();
             lucide.createIcons();
         }
 
-        // --- インベントリ描画 ---
+        // --- ① 周期習慣チャレンジの追加・描画・達成 ---
+        document.getElementById('habitForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('habitTitleInput').value.trim();
+            const intervalDays = parseInt(document.getElementById('habitIntervalInput').value, 10);
+            const durationDays = parseInt(document.getElementById('habitDurationInput').value, 10);
+            const difficulty = document.getElementById('habitDifficultyInput').value;
+            if (!title) return;
+
+            state.habits.unshift({
+                id: Date.now(),
+                title,
+                intervalDays,
+                durationDays,
+                startDate: Date.now(),
+                nextAvailableAt: Date.now(), // 初回はすぐ挑戦できる
+                completedCount: 0,
+                streak: 0,
+                difficulty
+            });
+
+            document.getElementById('habitTitleInput').value = '';
+            showToast(`「${title}」の${durationDays}日間チャレンジを開始しました！`, '🔥');
+            saveState();
+            render();
+        });
+
+        function renderHabits() {
+            const listEl = document.getElementById('habitList');
+            listEl.innerHTML = '';
+
+            const now = Date.now();
+            let readyCount = 0;
+
+            if (state.habits.length === 0) {
+                listEl.innerHTML = `
+                    <div class="glass-card rounded-2xl p-8 text-center text-slate-400">
+                        <p class="text-sm font-bold mb-1">まだ習慣チャレンジがありません</p>
+                        <p class="text-xs text-slate-500">上のフォームから「何日おきに・何日間続けるか」を決めて登録しよう！</p>
+                    </div>`;
+            }
+
+            state.habits.forEach(habit => {
+                const diff = DIFFICULTY_CONFIG[habit.difficulty];
+                const totalTargetCount = Math.max(1, Math.ceil(habit.durationDays / habit.intervalDays));
+                const isFinishedAll = habit.completedCount >= totalTargetCount;
+                const isReady = !isFinishedAll && now >= habit.nextAvailableAt;
+                if (isReady) readyCount++;
+
+                // 残り待機時間の計算
+                let statusBadge = '';
+                if (isFinishedAll) {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-black">👑 期間コンプリート！</span>`;
+                } else if (isReady) {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-black animate-pulse">🔥 今日のチャレンジ可能！</span>`;
+                } else {
+                    const diffMs = habit.nextAvailableAt - now;
+                    const hoursLeft = Math.ceil(diffMs / (1000 * 60 * 60));
+                    const timeText = hoursLeft >= 24 ? `あと約${Math.ceil(hoursLeft / 24)}日後に復活` : `あと約${hoursLeft}時間後に復活`;
+                    statusBadge = `<span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 text-xs font-bold">⏳ 休息期間中（${timeText}）</span>`;
+                }
+
+                const progressPct = Math.min(100, Math.round((habit.completedCount / totalTargetCount) * 100));
+
+                const card = document.createElement('div');
+                card.className = `glass-card rounded-2xl p-4 sm:p-5 transition border ${
+                    isReady ? 'border-indigo-500/50 shadow-lg shadow-indigo-950/30' : 'border-slate-800/80 opacity-85'
+                }`;
+
+                card.innerHTML = `
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="text-[11px] font-bold px-2 py-0.5 rounded border ${diff.color}">${diff.label}</span>
+                            <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">${habit.intervalDays}日ごと / 計${habit.durationDays}日間</span>
+                            ${habit.streak > 0 ? `<span class="text-[11px] font-black text-orange-400">🔥 ${habit.streak}連続達成中</span>` : ''}
+                        </div>
+                        ${statusBadge}
+                    </div>
+
+                    <h3 class="text-base font-black text-white mb-3">${escapeHTML(habit.title)}</h3>
+
+                    <!-- チャレンジ期間全体の進捗バー -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-[11px] font-bold text-slate-400 mb-1">
+                            <span>期間達成度（${habit.completedCount} / ${totalTargetCount} 回クリア）</span>
+                            <span class="text-indigo-300">${progressPct}%</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                            <div class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-500" style="width: ${progressPct}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
+                        <div class="flex items-center gap-2">
+                            <button onclick="deleteHabit(${habit.id})" class="text-xs text-slate-500 hover:text-rose-400 transition flex items-center gap-1">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> 削除
+                            </button>
+                            ${!isReady && !isFinishedAll ? `
+                                <button onclick="forceReadyHabit(${habit.id})" class="text-[11px] text-slate-500 hover:text-indigo-300 underline ml-2" title="テストや前倒しで今すぐ挑戦する">
+                                    前倒しで今すぐ挑戦
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            ${isReady ? `
+                                <button onclick="completeHabit(${habit.id})" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black rounded-xl shadow flex items-center gap-1.5 transition transform active:scale-95">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4"></i> 今回の挑戦クリア！（+${diff.score}pt）
+                                </button>
+                                <button onclick="failHabit(${habit.id})" class="px-3 py-2 bg-slate-800 hover:bg-rose-600/80 text-slate-300 hover:text-white text-xs font-bold rounded-xl border border-slate-700 transition">
+                                    サボった…
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                listEl.appendChild(card);
+            });
+
+            const badge = document.getElementById('habitReadyBadge');
+            if (readyCount > 0) {
+                badge.textContent = readyCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function completeHabit(id) {
+            const habit = state.habits.find(h => h.id === id);
+            if (!habit) return;
+
+            const diff = DIFFICULTY_CONFIG[habit.difficulty];
+            habit.completedCount++;
+            habit.streak++;
+            // 次回挑戦可能日時を「現在時刻 + 指定した間隔(日)」に設定
+            habit.nextAvailableAt = Date.now() + (habit.intervalDays * DAY_MS);
+
+            // 連続ボーナス込みのスコア＆コイン加算
+            const streakBonus = habit.streak * 10;
+            const gainedScore = diff.score + streakBonus;
+            state.scorePt += gainedScore;
+            state.coins += diff.coins;
+
+            // アイテムドロップ
+            state.inventory.shard++;
+            let dropMsg = 'ほしのカケラ×1';
+            if (habit.difficulty === 'hard' || habit.streak % 3 === 0) {
+                state.inventory.fruit++;
+                dropMsg += '・にじいろ果実×1';
+            }
+
+            // 期間コンプリートボーナス
+            const totalTargetCount = Math.max(1, Math.ceil(habit.durationDays / habit.intervalDays));
+            if (habit.completedCount >= totalTargetCount) {
+                state.inventory.stone++;
+                state.scorePt += 300;
+                confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+                showToast(`🎊 期間コンプリート！進化の秘石×1 ＆ +300pt獲得！`, '👑', 'bg-amber-900/95 border-amber-400');
+            } else {
+                confetti({ particleCount: 45, spread: 60, origin: { y: 0.7 } });
+                showToast(`習慣クリア！+${gainedScore}pt（連続ボーナス+${streakBonus}）＆ ${dropMsg}`, '🔥', 'bg-emerald-900/90 border-emerald-400');
+            }
+
+            document.getElementById('partnerSpeech').textContent = `「${habit.streak}回連続クリアすごい！次は${habit.intervalDays}日後にまた挑戦しようね！」`;
+            saveState();
+            render();
+        }
+
+        function failHabit(id) {
+            const habit = state.habits.find(h => h.id === id);
+            if (!habit) return;
+
+            const diff = DIFFICULTY_CONFIG[habit.difficulty];
+            habit.streak = 0;
+            habit.nextAvailableAt = Date.now() + (habit.intervalDays * DAY_MS);
+
+            // ダメージ演出
+            const app = document.getElementById('appContainer');
+            app.classList.remove('animate-shake');
+            void app.offsetWidth;
+            app.classList.add('animate-shake');
+
+            const overlay = document.getElementById('damageOverlay');
+            overlay.classList.remove('damage-flash');
+            void overlay.offsetWidth;
+            overlay.classList.add('damage-flash');
+
+            state.partner.hp = Math.max(0, state.partner.hp - diff.hpPenalty);
+            state.scorePt = Math.max(0, state.scorePt - 20);
+            document.getElementById('partnerSpeech').textContent = `「連続記録が途切れちゃった…次は${habit.intervalDays}日後にリベンジしよう！」`;
+            showToast(`習慣サボりペナルティ…相棒のHP -${diff.hpPenalty} / スコア -20pt`, '💔', 'bg-rose-950/90 border-rose-500');
+
+            if (state.partner.hp === 0) triggerDownPenalty();
+            saveState();
+            render();
+        }
+
+        function forceReadyHabit(id) {
+            const habit = state.habits.find(h => h.id === id);
+            if (!habit) return;
+            habit.nextAvailableAt = Date.now();
+            saveState();
+            render();
+        }
+
+        function deleteHabit(id) {
+            state.habits = state.habits.filter(h => h.id !== id);
+            saveState();
+            render();
+        }
+
+        // --- ② 単発クエスト関連 ---
+        document.getElementById('taskForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('taskTitleInput').value.trim();
+            const difficulty = document.getElementById('taskDifficultyInput').value;
+            if (!title) return;
+
+            state.tasks.unshift({ id: Date.now(), title, difficulty, status: 'active' });
+            document.getElementById('taskTitleInput').value = '';
+            saveState();
+            render();
+        });
+
+        function renderTasks() {
+            const listEl = document.getElementById('taskList');
+            listEl.innerHTML = '';
+
+            if (state.tasks.length === 0) {
+                listEl.innerHTML = `<div class="glass-card rounded-2xl p-6 text-center text-slate-500 text-xs">単発クエストはありません</div>`;
+                return;
+            }
+
+            state.tasks.forEach(task => {
+                const diff = DIFFICULTY_CONFIG[task.difficulty];
+                const isDone = task.status !== 'active';
+                const card = document.createElement('div');
+                card.className = `glass-card rounded-xl p-4 flex items-center justify-between gap-3 ${isDone ? 'opacity-50' : ''}`;
+                card.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${diff.color}">${diff.label}</span>
+                            <span class="text-[11px] font-bold text-indigo-300">+${diff.score}pt</span>
+                        </div>
+                        <p class="text-sm font-bold ${isDone ? 'line-through text-slate-400' : 'text-white'}">${escapeHTML(task.title)}</p>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        ${task.status === 'active' ? `
+                            <button onclick="completeTask(${task.id})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg">達成</button>
+                            <button onclick="failTask(${task.id})" class="px-2.5 py-1.5 bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white text-xs font-bold rounded-lg">失敗</button>
+                        ` : `
+                            <button onclick="deleteTask(${task.id})" class="p-1.5 text-slate-500 hover:text-slate-300"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        `}
+                    </div>
+                `;
+                listEl.appendChild(card);
+            });
+        }
+
+        function completeTask(id) {
+            const task = state.tasks.find(t => t.id === id);
+            if (!task || task.status !== 'active') return;
+            task.status = 'completed';
+            const diff = DIFFICULTY_CONFIG[task.difficulty];
+            state.coins += diff.coins;
+            state.scorePt += diff.score;
+            state.inventory.shard++;
+            if (task.difficulty === 'hard') state.inventory.stone++;
+
+            confetti({ particleCount: 40, spread: 55, origin: { y: 0.7 } });
+            showToast(`クエスト達成！+${diff.score}pt / +${diff.coins}Coin`, '🎉');
+            saveState();
+            render();
+        }
+
+        function failTask(id) {
+            const task = state.tasks.find(t => t.id === id);
+            if (!task || task.status !== 'active') return;
+            task.status = 'failed';
+            const diff = DIFFICULTY_CONFIG[task.difficulty];
+            state.partner.hp = Math.max(0, state.partner.hp - diff.hpPenalty);
+            showToast(`クエスト失敗…相棒のHP -${diff.hpPenalty}`, '💔', 'bg-rose-950/90 border-rose-500');
+            if (state.partner.hp === 0) triggerDownPenalty();
+            saveState();
+            render();
+        }
+
+        function deleteTask(id) {
+            state.tasks = state.tasks.filter(t => t.id !== id);
+            saveState();
+            render();
+        }
+
+        // --- ③ フレンドランキング＆相棒お披露目機能 ---
+        function renderFriends() {
+            const container = document.getElementById('friendLeaderboard');
+            container.innerHTML = '';
+
+            const maxStreak = state.habits.reduce((max, h) => Math.max(max, h.streak || 0), 0);
+
+            // 自分とフレンドを合体させてスコア順にソート
+            const allMembers = [
+                {
+                    id: state.playerId,
+                    name: `${state.playerName}（自分）`,
+                    scorePt: state.scorePt,
+                    stageIndex: state.partner.stageIndex,
+                    level: state.partner.level,
+                    streakMax: maxStreak,
+                    isMe: true
+                },
+                ...state.friends.map(f => ({ ...f, isMe: false }))
+            ].sort((a, b) => b.scorePt - a.scorePt);
+
+            allMembers.forEach((member, idx) => {
+                const rank = idx + 1;
+                const stage = PARTNER_STAGES[member.stageIndex] || PARTNER_STAGES[0];
+                const rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}位`;
+
+                const row = document.createElement('div');
+                row.className = `p-3 rounded-xl border flex items-center justify-between gap-3 transition ${
+                    member.isMe 
+                    ? 'bg-indigo-950/40 border-indigo-500/50' 
+                    : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
+                }`;
+
+                row.innerHTML = `
+                    <div class="flex items-center gap-3 min-w-0">
+                        <span class="text-base font-black w-6 text-center shrink-0">${rankIcon}</span>
+                        <!-- 友達の相棒アイコン -->
+                        <div class="w-11 h-11 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-2xl shrink-0 relative" title="${stage.name}">
+                            ${stage.emoji}
+                            <span class="absolute -bottom-1 -right-1 px-1.5 py-0.2 bg-slate-800 border border-slate-600 rounded text-[9px] font-black text-amber-400">Lv.${member.level}</span>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-xs font-black text-white truncate">${escapeHTML(member.name)}</p>
+                            <p class="text-[10px] text-slate-400 truncate">相棒：${stage.name}</p>
+                            <p class="text-[10px] text-orange-400 font-bold">最大連続記録：${member.streakMax || 0}回</p>
+                        </div>
+                    </div>
+
+                    <div class="text-right shrink-0 flex flex-col items-end gap-1">
+                        <span class="text-sm font-black text-indigo-300">${member.scorePt} <span class="text-[10px]">pt</span></span>
+                        ${!member.isMe ? `
+                            <button onclick="cheerFriend('${member.id}')" class="px-2 py-0.5 rounded-full bg-pink-500/15 hover:bg-pink-500/30 border border-pink-500/40 text-pink-300 text-[10px] font-bold flex items-center gap-1 transition">
+                                ❤️ 応援 (${member.likes || 0})
+                            </button>
+                        ` : `<span class="text-[10px] text-indigo-400 font-bold">あなた</span>`}
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function cheerFriend(friendId) {
+            const friend = state.friends.find(f => f.id === friendId);
+            if (!friend) return;
+            friend.likes = (friend.likes || 0) + 1;
+            state.coins += 5; // 応援すると自分にも5コイン
+            showToast(`${friend.name}の相棒を応援した！（+5 Coin）`, '💖');
+            saveState();
+            render();
+        }
+
+        function generateMyShareCode() {
+            const maxStreak = state.habits.reduce((max, h) => Math.max(max, h.streak || 0), 0);
+            const payload = {
+                id: state.playerId,
+                name: state.playerName,
+                scorePt: state.scorePt,
+                stageIndex: state.partner.stageIndex,
+                level: state.partner.level,
+                streakMax: maxStreak
+            };
+            // 日本語を含むJSONを安全にBase64エンコード
+            const jsonStr = JSON.stringify(payload);
+            const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
+            return 'QP_' + encoded;
+        }
+
+        function openFriendModal() {
+            document.getElementById('playerNameInput').value = state.playerName;
+            document.getElementById('myShareCode').value = generateMyShareCode();
+            const modal = document.getElementById('friendModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeFriendModal() {
+            const modal = document.getElementById('friendModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function updatePlayerName() {
+            const newName = document.getElementById('playerNameInput').value.trim();
+            if (!newName) return;
+            state.playerName = newName;
+            document.getElementById('myShareCode').value = generateMyShareCode();
+            showToast(`プレイヤー名を「${newName}」に変更しました！`, '✏️');
+            saveState();
+            render();
+        }
+
+        function copyMyShareCode() {
+            const input = document.getElementById('myShareCode');
+            input.select();
+            navigator.clipboard.writeText(input.value);
+            showToast('共有コードをコピーしました！友達に送ろう！', '📋', 'bg-emerald-900/90 border-emerald-400');
+        }
+
+        function importFriendCode() {
+            const raw = document.getElementById('friendCodeInput').value.trim();
+            if (!raw.startsWith('QP_')) {
+                showToast('正しい共有コード（QP_から始まる文字）を貼り付けてください', '⚠️', 'bg-rose-950 border-rose-500');
+                return;
+            }
+            try {
+                const encoded = raw.slice(3);
+                const jsonStr = decodeURIComponent(escape(atob(encoded)));
+                const data = JSON.parse(jsonStr);
+
+                if (!data.id || !data.name) throw new Error('Invalid');
+                if (data.id === state.playerId) {
+                    showToast('自分自身のコードは登録できません', '⚠️');
+                    return;
+                }
+
+                const existingIdx = state.friends.findIndex(f => f.id === data.id);
+                if (existingIdx >= 0) {
+                    state.friends[existingIdx] = {
+                        ...state.friends[existingIdx],
+                        ...data,
+                        updatedAt: Date.now()
+                    };
+                    showToast(`「${data.name}」の最新データに更新しました！`, '🔄', 'bg-indigo-900 border-indigo-400');
+                } else {
+                    state.friends.push({
+                        ...data,
+                        likes: 0,
+                        updatedAt: Date.now()
+                    });
+                    showToast(`「${data.name}」をフレンドに追加しました！`, '🎉', 'bg-emerald-900 border-emerald-400');
+                }
+
+                document.getElementById('friendCodeInput').value = '';
+                saveState();
+                render();
+                closeFriendModal();
+            } catch (e) {
+                showToast('コードの読み取りに失敗しました。文字が途中で切れていないか確認してください。', '⚠️', 'bg-rose-950 border-rose-500');
+            }
+        }
+
+        // --- 相棒育成＆インベントリ・ショップ関連 ---
         function renderInventory() {
             const grid = document.getElementById('inventoryGrid');
             grid.innerHTML = '';
-
             Object.values(ITEM_MASTER).forEach(item => {
                 const count = state.inventory[item.id] || 0;
                 const btn = document.createElement('button');
                 btn.onclick = () => useItemOnPartner(item.id);
                 btn.disabled = count <= 0;
-                btn.className = `p-2.5 rounded-xl border text-center transition flex flex-col items-center justify-center relative ${
-                    count > 0 
-                    ? 'bg-slate-900/90 border-slate-700 hover:border-amber-400/60 hover:bg-slate-800 cursor-pointer active:scale-95' 
-                    : 'bg-slate-950/40 border-slate-800/50 opacity-45 cursor-not-allowed'
+                btn.className = `p-2 rounded-xl border text-center transition flex flex-col items-center justify-center relative ${
+                    count > 0 ? 'bg-slate-900/90 border-slate-700 hover:border-amber-400/60 cursor-pointer active:scale-95' : 'bg-slate-950/40 border-slate-800/50 opacity-45 cursor-not-allowed'
                 }`;
                 btn.innerHTML = `
-                    <span class="absolute top-1.5 right-2 text-[11px] font-black ${count > 0 ? 'text-amber-400' : 'text-slate-500'}">×${count}</span>
-                    <span class="text-2xl mb-1">${item.emoji}</span>
-                    <span class="text-[11px] font-bold text-slate-200 leading-tight">${item.name}</span>
-                    <span class="text-[9px] text-slate-400 mt-0.5">${item.desc}</span>
+                    <span class="absolute top-1 right-1.5 text-[10px] font-black ${count > 0 ? 'text-amber-400' : 'text-slate-500'}">×${count}</span>
+                    <span class="text-xl mb-0.5">${item.emoji}</span>
+                    <span class="text-[10px] font-bold text-slate-200 leading-tight">${item.name}</span>
                 `;
                 grid.appendChild(btn);
             });
         }
 
-        // --- アイテムを相棒に使用 ---
         function useItemOnPartner(itemId) {
             if ((state.inventory[itemId] || 0) <= 0) return;
-
             const item = ITEM_MASTER[itemId];
             state.inventory[itemId]--;
-
-            // デバフ中はEXP半減
             const gainExp = state.isHungryDebuff ? Math.floor(item.exp / 2) : item.exp;
             state.partner.exp += gainExp;
             state.partner.hp = Math.min(state.partner.maxHp, state.partner.hp + item.hp);
+            if (state.partner.hp >= 50 && state.isHungryDebuff) state.isHungryDebuff = false;
 
-            if (state.partner.hp >= 50 && state.isHungryDebuff) {
-                state.isHungryDebuff = false;
-                showToast('相棒の空腹状態が回復した！', '💖', 'bg-emerald-900/90 border-emerald-500');
-            }
-
-            // レベルアップ判定
-            let leveledUp = false;
             while (state.partner.exp >= getNextLevelExp(state.partner.level)) {
                 state.partner.exp -= getNextLevelExp(state.partner.level);
                 state.partner.level++;
                 state.partner.maxHp += 10;
                 state.partner.hp = state.partner.maxHp;
-                leveledUp = true;
+                state.scorePt += 50; // レベルアップでも競争ポイント加算
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+                showToast(`相棒が Lv.${state.partner.level} に成長！（+50pt）`, '🎉');
             }
-
-            // アニメーションとセリフ
-            const avatarBtn = document.getElementById('partnerAvatarBtn');
-            avatarBtn.classList.remove('animate-bounce-short');
-            void avatarBtn.offsetWidth;
-            avatarBtn.classList.add('animate-bounce-short');
-
-            const speech = document.getElementById('partnerSpeech');
-            if (leveledUp) {
-                speech.textContent = `「やったー！Lv.${state.partner.level}にレベルアップしたよ！」`;
-                confetti({ particleCount: 55, spread: 60, origin: { y: 0.6 } });
-                showToast(`相棒が Lv.${state.partner.level} にレベルアップ！`, '🎉', 'bg-indigo-900/90 border-indigo-400');
-            } else {
-                speech.textContent = `「もぐもぐ…${item.name}おいしい！経験値+${gainExp}！」`;
-                showToast(`${item.name}をあげた！（EXP +${gainExp} / げんき +${item.hp}）`, item.emoji);
-            }
-
-            // 進化条件チェック
-            const stageInfo = PARTNER_STAGES[state.partner.stageIndex];
-            if (state.partner.stageIndex < PARTNER_STAGES.length - 1 && state.partner.level >= stageInfo.reqLevel) {
-                if (state.inventory.stone < stageInfo.reqStones) {
-                    speech.textContent = `「進化できそう！あとは『進化の秘石』が${stageInfo.reqStones}個あれば…！」`;
-                } else {
-                    speech.textContent = `「体が光り始めた…！いつでも進化できるよ！」`;
-                }
-            }
-
             saveState();
             render();
         }
 
-        // --- 進化実行 ---
         function evolvePartner() {
             const p = state.partner;
             const stageInfo = PARTNER_STAGES[p.stageIndex];
@@ -648,16 +1108,15 @@
             state.inventory.stone -= stageInfo.reqStones;
             p.stageIndex++;
             p.hp = p.maxHp;
+            state.scorePt += 200; // 進化ボーナスポイント
 
             const nextStage = PARTNER_STAGES[p.stageIndex];
             document.getElementById('evolvePreviewIcon').textContent = nextStage.emoji;
             document.getElementById('evolveNewName').textContent = nextStage.name;
             document.getElementById('evolveNewDesc').textContent = nextStage.desc;
-            
             const modal = document.getElementById('evolveModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-
             confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
             saveState();
             render();
@@ -669,126 +1128,35 @@
             modal.classList.remove('flex');
         }
 
-        // --- 相棒をなでる ---
         function petPartner() {
-            const speech = document.getElementById('partnerSpeech');
             const stageInfo = PARTNER_STAGES[state.partner.stageIndex];
-            const lines = [
-                '「なでなで嬉しいな！次のクエストも一緒に頑張ろう！」',
-                `「進化には Lv.${stageInfo.reqLevel} と 進化の秘石×${stageInfo.reqStones} が必要だよ！」`,
-                '「難しいクエストほどレアなアイテムが落ちやすいみたい！」',
-                '「タスクを失敗するとお腹が空いちゃうから気をつけてね…」'
-            ];
-            if (state.partner.stageIndex === PARTNER_STAGES.length - 1) {
-                lines[1] = '「キミのおかげで最高の姿になれたよ！ありがとう！」';
-            }
-            speech.textContent = lines[Math.floor(Math.random() * lines.length)];
-
-            const avatarBtn = document.getElementById('partnerAvatarBtn');
-            avatarBtn.classList.remove('animate-bounce-short');
-            void avatarBtn.offsetWidth;
-            avatarBtn.classList.add('animate-bounce-short');
+            document.getElementById('partnerSpeech').textContent = `「進化条件は Lv.${stageInfo.reqLevel} と 進化の秘石×${stageInfo.reqStones} だよ！友達にも自慢しよう！」`;
+            const btn = document.getElementById('partnerAvatarBtn');
+            btn.classList.remove('animate-bounce-short');
+            void btn.offsetWidth;
+            btn.classList.add('animate-bounce-short');
         }
 
-        // --- タスク一覧描画 ---
-        function renderTasks() {
-            const listEl = document.getElementById('taskList');
-            listEl.innerHTML = '';
-
-            const filtered = state.tasks.filter(t => {
-                if (state.filter === 'active') return t.status === 'active';
-                if (state.filter === 'completed') return t.status === 'completed';
-                return true;
-            });
-
-            if (filtered.length === 0) {
-                listEl.innerHTML = `
-                    <div class="glass-card rounded-2xl p-8 text-center text-slate-500">
-                        <p class="text-sm font-semibold">該当するクエストがありません</p>
-                    </div>
-                `;
-                return;
-            }
-
-            filtered.forEach(task => {
-                const diff = DIFFICULTY_CONFIG[task.difficulty];
-                const isCompleted = task.status === 'completed';
-                const isFailed = task.status === 'failed';
-
-                const card = document.createElement('div');
-                card.className = `glass-card rounded-xl p-4 transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                    isCompleted ? 'opacity-60 border-emerald-500/20' : 
-                    isFailed ? 'opacity-60 border-rose-500/30 bg-rose-950/10' : 
-                    'hover:border-slate-600'
-                }`;
-
-                card.innerHTML = `
-                    <div class="space-y-1.5 flex-1">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="text-[11px] font-bold px-2 py-0.5 rounded border ${diff.color}">${diff.label}</span>
-                            <span class="text-xs font-bold text-amber-400">+${diff.coins} Coin</span>
-                            ${isCompleted ? '<span class="text-[11px] font-bold text-emerald-400">✓ 達成済み</span>' : ''}
-                            ${isFailed ? '<span class="text-[11px] font-bold text-rose-400">✕ 失敗</span>' : ''}
-                        </div>
-                        <p class="text-sm sm:text-base font-bold ${isCompleted || isFailed ? 'line-through text-slate-400' : 'text-white'}">
-                            ${escapeHTML(task.title)}
-                        </p>
-                    </div>
-
-                    <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
-                        ${task.status === 'active' ? `
-                            <button onclick="completeTask(${task.id})" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow shadow-emerald-600/20 flex items-center gap-1 transition transform active:scale-95">
-                                <i data-lucide="check" class="w-3.5 h-3.5"></i> 達成！
-                            </button>
-                            <button onclick="failTask(${task.id})" class="px-3 py-2 bg-slate-800 hover:bg-rose-600/80 text-slate-300 hover:text-white text-xs font-bold rounded-lg border border-slate-700 hover:border-rose-500 flex items-center gap-1 transition">
-                                <i data-lucide="x" class="w-3.5 h-3.5"></i> 失敗…
-                            </button>
-                        ` : `
-                            <button onclick="deleteTask(${task.id})" class="p-2 text-slate-500 hover:text-slate-300 rounded-lg transition" title="削除">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
-                        `}
-                    </div>
-                `;
-                listEl.appendChild(card);
-            });
+        function triggerDownPenalty() {
+            const modal = document.getElementById('gameOverModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
         }
 
-        // --- 進行度グラフ描画 ---
-        function renderProgress() {
-            const total = state.tasks.length;
-            const completed = state.tasks.filter(t => t.status === 'completed').length;
-            const failed = state.tasks.filter(t => t.status === 'failed').length;
-            const active = state.tasks.filter(t => t.status === 'active').length;
-
-            document.getElementById('statActive').textContent = active;
-            document.getElementById('statCompleted').textContent = completed;
-            document.getElementById('statFailed').textContent = failed;
-
-            const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
-            document.getElementById('progressPercent').textContent = `${percent}%`;
-
-            const ring = document.getElementById('progressRing');
-            const circumference = 314.159;
-            const offset = circumference - (percent / 100) * circumference;
-            ring.style.strokeDashoffset = offset;
-
-            if (total > 0) {
-                document.getElementById('barCompleted').style.width = `${(completed / total) * 100}%`;
-                document.getElementById('barFailed').style.width = `${(failed / total) * 100}%`;
-                document.getElementById('barActive').style.width = `${(active / total) * 100}%`;
-            } else {
-                document.getElementById('barCompleted').style.width = '0%';
-                document.getElementById('barFailed').style.width = '0%';
-                document.getElementById('barActive').style.width = '0%';
-            }
+        function recoverFromDown() {
+            state.coins = Math.floor(state.coins / 2);
+            state.partner.hp = 40;
+            state.isHungryDebuff = true;
+            const modal = document.getElementById('gameOverModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            saveState();
+            render();
         }
 
-        // --- ショップ描画 ---
         function renderRewards() {
             const container = document.getElementById('rewardList');
             container.innerHTML = '';
-
             state.rewards.forEach(reward => {
                 const canAfford = state.coins >= reward.cost;
                 const el = document.createElement('div');
@@ -800,201 +1168,43 @@
                     </div>
                     <button onclick="redeemReward(${reward.id})" ${canAfford ? '' : 'disabled'} 
                         class="px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition ${
-                            canAfford 
-                            ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20 active:scale-95' 
-                            : 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                        }">
-                        交換
-                    </button>
+                            canAfford ? 'bg-amber-500 hover:bg-amber-400 text-slate-950' : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                        }">交換</button>
                 `;
                 container.appendChild(el);
             });
         }
 
-        // --- クエスト追加 ---
-        document.getElementById('taskForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const input = document.getElementById('taskTitleInput');
-            const diff = document.getElementById('taskDifficultyInput').value;
-            const title = input.value.trim();
-            if (!title) return;
-
-            state.tasks.unshift({
-                id: Date.now(),
-                title: title,
-                difficulty: diff,
-                status: 'active'
-            });
-
-            input.value = '';
-            saveState();
-            render();
-        });
-
-        // --- クエスト達成（報酬＆育成アイテムドロップ！） ---
-        function completeTask(id) {
-            const task = state.tasks.find(t => t.id === id);
-            if (!task || task.status !== 'active') return;
-
-            task.status = 'completed';
-            const config = DIFFICULTY_CONFIG[task.difficulty];
-            state.coins += config.coins;
-
-            // 難易度に応じた育成素材ドロップ抽選
-            let droppedItems = [];
-            if (task.difficulty === 'easy') {
-                state.inventory.shard++;
-                droppedItems.push('ほしのカケラ×1');
-            } else if (task.difficulty === 'normal') {
-                state.inventory.shard++;
-                droppedItems.push('ほしのカケラ×1');
-                if (Math.random() < 0.6) {
-                    state.inventory.fruit++;
-                    droppedItems.push('にじいろ果実×1');
-                }
-            } else if (task.difficulty === 'hard') {
-                state.inventory.fruit++;
-                state.inventory.stone++;
-                droppedItems.push('にじいろ果実×1', '進化の秘石×1');
-            }
-
-            // 紙吹雪演出
-            confetti({
-                particleCount: 45,
-                spread: 60,
-                origin: { y: 0.7 }
-            });
-
-            document.getElementById('partnerSpeech').textContent = `「クエスト達成おめでとう！${droppedItems.join(' と ')} を拾ったよ！」`;
-            showToast(`報酬GET！ +${config.coins}Coin ＆ ${droppedItems.join('・')}`, '🎁', 'bg-emerald-900/90 border-emerald-400');
-
-            saveState();
-            render();
-        }
-
-        // --- クエスト失敗（ペナルティ発動！） ---
-        function failTask(id) {
-            const task = state.tasks.find(t => t.id === id);
-            if (!task || task.status !== 'active') return;
-
-            task.status = 'failed';
-            const config = DIFFICULTY_CONFIG[task.difficulty];
-
-            // 画面シェイク＆赤フラッシュ
-            const app = document.getElementById('appContainer');
-            app.classList.remove('animate-shake');
-            void app.offsetWidth;
-            app.classList.add('animate-shake');
-
-            const overlay = document.getElementById('damageOverlay');
-            overlay.classList.remove('damage-flash');
-            void overlay.offsetWidth;
-            overlay.classList.add('damage-flash');
-
-            // 相棒にダメージ
-            state.partner.hp = Math.max(0, state.partner.hp - config.hpPenalty);
-            document.getElementById('partnerSpeech').textContent = `「うぅ…クエスト失敗で元気が減っちゃった…（HP -${config.hpPenalty}）」`;
-            showToast(`ペナルティ発動！相棒のげんきが ${config.hpPenalty} 減少…`, '💔', 'bg-rose-950/90 border-rose-500');
-
-            if (state.partner.hp === 0) {
-                triggerDownPenalty();
-            }
-
-            saveState();
-            render();
-        }
-
-        // --- 相棒ダウン演出 ---
-        function triggerDownPenalty() {
-            const randomMission = PENALTY_MISSIONS[Math.floor(Math.random() * PENALTY_MISSIONS.length)];
-            document.getElementById('penaltyMissionText').textContent = randomMission;
-            const modal = document.getElementById('gameOverModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function recoverFromDown() {
-            state.coins = Math.floor(state.coins / 2);
-            state.partner.hp = 40;
-            state.isHungryDebuff = true;
-            document.getElementById('partnerSpeech').textContent = '「復活したけどお腹ペコペコだよ…アイテムで回復させて…」';
-
-            const modal = document.getElementById('gameOverModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-
-            saveState();
-            render();
-        }
-
-        // --- ショップ交換 ---
         function redeemReward(id) {
             const reward = state.rewards.find(r => r.id === id);
             if (!reward || state.coins < reward.cost) return;
-
             state.coins -= reward.cost;
-
             if (reward.type === 'item' && reward.itemId) {
                 state.inventory[reward.itemId] = (state.inventory[reward.itemId] || 0) + 1;
-                showToast(`「${reward.title}」を手に入れた！インベントリからあげよう！`, '🎒', 'bg-indigo-900/90 border-indigo-400');
+                showToast(`「${reward.title}」を手に入れた！`, '🎒');
             } else {
                 confetti({ particleCount: 30, spread: 50, origin: { y: 0.6 } });
-                showToast(`ご褒美「${reward.title}」と交換しました！思いっきり楽しもう！`, '🎉', 'bg-amber-900/90 border-amber-400');
+                showToast(`ご褒美「${reward.title}」と交換しました！`, '🎉');
             }
-
             saveState();
             render();
         }
 
         function addCustomReward() {
-            const title = prompt('自分へのご褒美の内容を入力してください（例：漫画を1巻読む）');
+            const title = prompt('自分へのご褒美の内容を入力してください');
             if (!title || !title.trim()) return;
-            const costStr = prompt('必要なコイン数を入力してください（例：100）', '100');
-            const cost = parseInt(costStr, 10);
+            const cost = parseInt(prompt('必要なコイン数（例：100）', '100'), 10);
             if (isNaN(cost) || cost <= 0) return;
-
-            state.rewards.push({
-                id: Date.now(),
-                title: `【ご褒美】${title.trim()}`,
-                cost: cost,
-                type: 'real'
-            });
+            state.rewards.push({ id: Date.now(), title: `【ご褒美】${title.trim()}`, cost, type: 'real' });
             saveState();
             render();
-        }
-
-        // --- その他操作 ---
-        function deleteTask(id) {
-            state.tasks = state.tasks.filter(t => t.id !== id);
-            saveState();
-            render();
-        }
-
-        function clearCompleted() {
-            state.tasks = state.tasks.filter(t => t.status === 'active');
-            saveState();
-            render();
-        }
-
-        function setFilter(filterType) {
-            state.filter = filterType;
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('bg-indigo-600', 'text-white');
-                btn.classList.add('text-slate-400');
-            });
-            const activeBtn = document.getElementById(`filter-${filterType}`);
-            activeBtn.classList.add('bg-indigo-600', 'text-white');
-            activeBtn.classList.remove('text-slate-400');
-            renderTasks();
         }
 
         function escapeHTML(str) {
-            return str.replace(/[&<>"']/g, function(m) {
-                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
-            });
+            return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
         }
 
-        // 初期描画
+        switchMainTab(state.activeTab || 'habits');
         render();
     </script>
 </body>
