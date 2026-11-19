@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quest & Partner To-Do | 習慣チャレンジ＆フレンド対戦</title>
+    <title>Quest & Partner To-Do | 集中タイマー＆相棒育成</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
@@ -18,6 +18,7 @@
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'Noto Sans JP', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
                     },
                     animation: {
                         'shake': 'shake 0.45s cubic-bezier(.36,.07,.19,.97) both',
@@ -55,11 +56,6 @@
             color: #f8fafc;
             overflow-x: hidden;
         }
-        .progress-ring__circle {
-            transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s ease;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-        }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
@@ -82,6 +78,48 @@
     <div id="damageOverlay" class="fixed inset-0 pointer-events-none z-50 transition-colors"></div>
     <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
+    <!-- 集中タイマー実行モーダル（フルスクリーン風集中モード） -->
+    <div id="focusTimerModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/95 backdrop-blur-xl p-4">
+        <div class="bg-slate-900 border-2 border-indigo-500/50 rounded-3xl max-w-md w-full p-6 sm:p-8 text-center shadow-2xl shadow-indigo-950/80 relative overflow-hidden">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-xs font-black mb-4">
+                <i data-lucide="timer" class="w-3.5 h-3.5 animate-spin"></i>
+                <span>集中モード実行中（完走で達成ロック解除！）</span>
+            </div>
+
+            <h2 id="timerTargetTitle" class="text-lg sm:text-xl font-black text-white mb-2 line-clamp-2">英単語を15分進める</h2>
+            <p class="text-xs text-slate-400 mb-6">タイマーが 00:00 になるまで集中しよう！</p>
+
+            <!-- 相棒の応援エリア -->
+            <div class="flex items-center justify-center gap-3 bg-slate-950/80 border border-slate-800 rounded-2xl p-3 mb-6">
+                <span id="timerPartnerEmoji" class="text-4xl animate-bounce">🥚</span>
+                <p id="timerPartnerCheer" class="text-xs text-left text-slate-200 font-bold leading-relaxed">
+                    「横で見守ってるよ！一緒に頑張ろうね！」
+                </p>
+            </div>
+
+            <!-- デジタルカウントダウン表示 -->
+            <div class="my-4">
+                <div id="timerDisplay" class="font-mono text-6xl sm:text-7xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-300 to-emerald-400">
+                    15:00
+                </div>
+                <!-- プログレスバー -->
+                <div class="w-full h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-800 mt-4">
+                    <div id="timerProgressBar" class="h-full bg-gradient-to-r from-indigo-500 via-cyan-400 to-emerald-400 transition-all duration-1000" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <!-- 操作ボタン -->
+            <div class="flex items-center justify-center gap-3 mt-8">
+                <button id="timerPauseBtn" onclick="togglePauseTimer()" class="flex-1 py-3 px-4 bg-slate-800 hover:bg-slate-700 text-white text-xs sm:text-sm font-bold rounded-xl border border-slate-700 flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="pause" class="w-4 h-4"></i> 一時停止
+                </button>
+                <button onclick="giveUpTimer()" class="py-3 px-4 bg-rose-950/60 hover:bg-rose-600 text-rose-300 hover:text-white text-xs sm:text-sm font-bold rounded-xl border border-rose-500/30 flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="flag" class="w-4 h-4"></i> ギブアップ
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ペナルティモーダル（相棒ダウン） -->
     <div id="gameOverModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md p-4">
         <div class="bg-slate-900 border-2 border-rose-600 rounded-2xl max-w-md w-full p-6 text-center shadow-2xl">
@@ -90,7 +128,7 @@
             </div>
             <h2 class="text-2xl font-black text-rose-500 tracking-wide mb-2">相棒が力尽きてしまった…</h2>
             <p class="text-slate-300 text-sm mb-5 leading-relaxed">
-                クエストの失敗が続き、相棒のげんき（HP）が0になりました。<br>
+                クエストの失敗やギブアップが続き、相棒のげんき（HP）が0になりました。<br>
                 <span class="text-rose-400 font-bold">ペナルティ：所持コインが半分になり、相棒が空腹状態になります。</span>
             </p>
             <div class="bg-slate-950/80 border border-rose-500/30 rounded-xl p-4 mb-6 text-left">
@@ -125,14 +163,13 @@
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <h2 class="text-lg font-black text-white flex items-center gap-2">
                     <i data-lucide="users" class="w-5 h-5 text-indigo-400"></i>
-                    フレンドと相棒・ポイントを見せ合う
+                    フレンドと相棒・勉強時間を競い合う
                 </h2>
                 <button onclick="closeFriendModal()" class="text-slate-400 hover:text-white">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <!-- 自分のプロフィール名＆コード発行 -->
             <div class="space-y-2.5 bg-slate-950/70 p-4 rounded-xl border border-slate-800">
                 <div class="flex items-center justify-between gap-2">
                     <label class="text-xs font-bold text-slate-300">あなたのプレイヤー名</label>
@@ -141,7 +178,7 @@
                         <button onclick="updatePlayerName()" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg">保存</button>
                     </div>
                 </div>
-                <p class="text-[11px] text-slate-400 pt-1">① 下のボタンで自分の最新ステータスコードをコピーして、LINEやチャットで友達に送ろう！</p>
+                <p class="text-[11px] text-slate-400 pt-1">① 自分の最新コードをコピーして、LINEやチャットで友達に送ろう！</p>
                 <div class="flex gap-2">
                     <input type="text" id="myShareCode" readonly class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-[11px] text-slate-300 font-mono">
                     <button onclick="copyMyShareCode()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shrink-0 flex items-center gap-1">
@@ -150,7 +187,6 @@
                 </div>
             </div>
 
-            <!-- 友達のコードを読み込む -->
             <div class="space-y-2 bg-slate-950/70 p-4 rounded-xl border border-slate-800">
                 <p class="text-xs font-bold text-slate-300">② 友達から送られてきたコードを貼り付けて追加・更新</p>
                 <div class="flex gap-2">
@@ -170,11 +206,11 @@
         <header class="glass-card rounded-2xl p-4 sm:px-6 mb-6 flex flex-wrap items-center justify-between gap-4 shadow-xl">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                    <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+                    <i data-lucide="timer" class="w-5 h-5 text-white"></i>
                 </div>
                 <div>
                     <h1 class="text-lg sm:text-xl font-black tracking-tight text-white">QUEST & PARTNER</h1>
-                    <p class="text-xs text-slate-400">周期チャレンジで習慣化＆フレンドと競争しよう</p>
+                    <p class="text-xs text-slate-400">集中タイマー完走で達成ロック解除＆相棒育成</p>
                 </div>
             </div>
 
@@ -182,6 +218,15 @@
                 <div id="debuffBadge" class="hidden items-center gap-1.5 bg-rose-500/20 border border-rose-500/40 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-300">
                     <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
                     <span>空腹ペナルティ中</span>
+                </div>
+
+                <!-- 累計集中時間 -->
+                <div class="flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 px-3.5 py-2 rounded-xl">
+                    <i data-lucide="clock" class="w-4 h-4 text-cyan-400"></i>
+                    <div>
+                        <p class="text-[10px] text-cyan-300/80 font-bold leading-none">FOCUS TIME</p>
+                        <p id="totalFocusText" class="text-sm font-black text-cyan-300 leading-tight">0分</p>
+                    </div>
                 </div>
 
                 <!-- 競争ポイント表示 -->
@@ -216,7 +261,7 @@
             <!-- 左カラム：クエスト＆習慣チャレンジ（7カラム） -->
             <div class="lg:col-span-7 space-y-5">
                 
-                <!-- モード切り替えタブ（単発クエスト / 周期習慣チャレンジ） -->
+                <!-- モード切り替えタブ -->
                 <div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl">
                     <button onclick="switchMainTab('habits')" id="tab-habits" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 bg-indigo-600 text-white shadow transition">
                         <i data-lucide="repeat" class="w-4 h-4"></i>
@@ -235,44 +280,57 @@
                         <div class="flex items-center justify-between mb-3">
                             <h2 class="text-sm font-bold text-white flex items-center gap-2">
                                 <i data-lucide="calendar-clock" class="w-4 h-4 text-indigo-400"></i>
-                                習慣化チャレンジを登録（自動で周期復活！）
+                                習慣化チャレンジを登録（タイマー時間設定つき）
                             </h2>
                         </div>
                         <form id="habitForm" class="space-y-3">
-                            <input type="text" id="habitTitleInput" required placeholder="例：英単語を15分やる、筋トレ30回、読書10ページ..." 
+                            <input type="text" id="habitTitleInput" required placeholder="例：英単語を覚える、数学のワークを解く、読書する..." 
                                 class="w-full bg-slate-950/70 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
                             
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                                <!-- 周期（何日おきにやるか） -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                <!-- 集中タイマー時間 -->
                                 <div>
-                                    <label class="block text-[11px] text-slate-400 font-bold mb-1">挑戦する間隔（周期）</label>
-                                    <select id="habitIntervalInput" class="w-full bg-slate-950/80 border border-slate-700 rounded-lg px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:border-indigo-500">
+                                    <label class="block text-[11px] text-cyan-300 font-bold mb-1">⏱ 必須タイマー</label>
+                                    <select id="habitMinutesInput" class="w-full bg-slate-950/80 border border-cyan-500/40 rounded-lg px-2.5 py-2 text-xs font-bold text-white focus:outline-none focus:border-cyan-400">
+                                        <option value="1">1分（お試し）</option>
+                                        <option value="10">10分集中</option>
+                                        <option value="15" selected>15分集中</option>
+                                        <option value="25">25分（ポモドーロ）</option>
+                                        <option value="45">45分集中</option>
+                                        <option value="60">60分ガッツリ</option>
+                                        <option value="0">タイマーなし（即達成可）</option>
+                                    </select>
+                                </div>
+
+                                <!-- 周期 -->
+                                <div>
+                                    <label class="block text-[11px] text-slate-400 font-bold mb-1">挑戦する間隔</label>
+                                    <select id="habitIntervalInput" class="w-full bg-slate-950/80 border border-slate-700 rounded-lg px-2.5 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:border-indigo-500">
                                         <option value="1">毎日（1日ごと）</option>
-                                        <option value="2">1日おき（2日ごと）</option>
-                                        <option value="3" selected>2日おき（3日ごと）</option>
-                                        <option value="5">4日おき（5日ごと）</option>
+                                        <option value="2" selected>1日おき（2日ごと）</option>
+                                        <option value="3">2日おき（3日ごと）</option>
                                         <option value="7">週1回（7日ごと）</option>
                                     </select>
                                 </div>
 
-                                <!-- 目標期間（何日間続けるか） -->
+                                <!-- 目標期間 -->
                                 <div>
                                     <label class="block text-[11px] text-slate-400 font-bold mb-1">チャレンジ期間</label>
-                                    <select id="habitDurationInput" class="w-full bg-slate-950/80 border border-slate-700 rounded-lg px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:border-indigo-500">
-                                        <option value="7">7日間（お試し習慣）</option>
-                                        <option value="14" selected>14日間（2週間定着）</option>
-                                        <option value="21">21日間（3週間マスター）</option>
-                                        <option value="30">30日間（1ヶ月チャレンジ）</option>
+                                    <select id="habitDurationInput" class="w-full bg-slate-950/80 border border-slate-700 rounded-lg px-2.5 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:border-indigo-500">
+                                        <option value="7">7日間</option>
+                                        <option value="14" selected>14日間</option>
+                                        <option value="21">21日間</option>
+                                        <option value="30">30日間</option>
                                     </select>
                                 </div>
 
                                 <!-- 難易度 -->
                                 <div>
-                                    <label class="block text-[11px] text-slate-400 font-bold mb-1">難易度（報酬量）</label>
-                                    <select id="habitDifficultyInput" class="w-full bg-slate-950/80 border border-slate-700 rounded-lg px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:border-indigo-500">
-                                        <option value="easy">★1 簡単 (+30pt)</option>
-                                        <option value="normal" selected>★2 普通 (+60pt)</option>
-                                        <option value="hard">★3 難しい (+120pt)</option>
+                                    <label class="block text-[11px] text-slate-400 font-bold mb-1">難易度</label>
+                                    <select id="habitDifficultyInput" class="w-full bg-slate-950/80 border border-slate-700 rounded-lg px-2.5 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:border-indigo-500">
+                                        <option value="easy">★1 簡単</option>
+                                        <option value="normal" selected>★2 普通</option>
+                                        <option value="hard">★3 難しい</option>
                                     </select>
                                 </div>
                             </div>
@@ -280,16 +338,14 @@
                             <div class="flex justify-end pt-1">
                                 <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs sm:text-sm font-bold rounded-xl shadow-lg flex items-center gap-1.5 transition transform active:scale-95">
                                     <i data-lucide="plus" class="w-4 h-4"></i>
-                                    この周期でチャレンジ開始
+                                    この条件でチャレンジ開始
                                 </button>
                             </div>
                         </form>
                     </div>
 
                     <!-- 登録済み習慣チャレンジ一覧 -->
-                    <div id="habitList" class="space-y-3">
-                        <!-- JSで描画 -->
-                    </div>
+                    <div id="habitList" class="space-y-3"></div>
                 </div>
 
                 <!-- ② 単発クエストエリア -->
@@ -302,16 +358,23 @@
                             </h2>
                         </div>
                         <form id="taskForm" class="space-y-3">
-                            <input type="text" id="taskTitleInput" required placeholder="例：部屋の片付け、提出物を出す..." 
+                            <input type="text" id="taskTitleInput" required placeholder="例：部屋の片付け、レポート作成..." 
                                 class="w-full bg-slate-950/70 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
                             
                             <div class="flex flex-wrap items-center justify-between gap-3">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs text-slate-400 font-medium">難易度:</span>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <select id="taskMinutesInput" class="bg-slate-950/80 border border-cyan-500/40 rounded-lg px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-cyan-400">
+                                        <option value="0">タイマーなし（即達成可）</option>
+                                        <option value="1">⏱ 1分タイマー</option>
+                                        <option value="15" selected>⏱ 15分タイマー</option>
+                                        <option value="25">⏱ 25分タイマー</option>
+                                        <option value="45">⏱ 45分タイマー</option>
+                                        <option value="60">⏱ 60分タイマー</option>
+                                    </select>
                                     <select id="taskDifficultyInput" class="bg-slate-950/80 border border-slate-700 rounded-lg px-3 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-indigo-500">
-                                        <option value="easy">★1 簡単 (+20 Coin / +25pt)</option>
-                                        <option value="normal" selected>★2 普通 (+40 Coin / +50pt)</option>
-                                        <option value="hard">★3 難しい (+80 Coin / +100pt)</option>
+                                        <option value="easy">★1 簡単</option>
+                                        <option value="normal" selected>★2 普通</option>
+                                        <option value="hard">★3 難しい</option>
                                     </select>
                                 </div>
                                 <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold rounded-xl shadow-lg flex items-center gap-1.5 transition">
@@ -322,9 +385,7 @@
                         </form>
                     </div>
 
-                    <div id="taskList" class="space-y-3">
-                        <!-- JSで描画 -->
-                    </div>
+                    <div id="taskList" class="space-y-3"></div>
                 </div>
 
             </div>
@@ -344,7 +405,7 @@
 
                     <div class="relative my-3 py-5 rounded-2xl bg-gradient-to-b from-slate-900/90 to-indigo-950/40 border border-slate-800 flex flex-col items-center justify-center">
                         <div id="partnerSpeech" class="mb-3 px-3.5 py-1.5 rounded-full bg-slate-800/90 border border-slate-700 text-xs text-slate-200 font-medium shadow text-center max-w-[90%]">
-                            「周期チャレンジを達成して一緒に成長しよう！」
+                            「タイマーを起動して最後まで集中しよう！」
                         </div>
 
                         <button onclick="petPartner()" id="partnerAvatarBtn" class="relative w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-500/20 via-purple-500/20 to-amber-500/20 border border-white/10 flex items-center justify-center text-5xl animate-float cursor-pointer hover:scale-105 transition select-none shadow-inner">
@@ -400,12 +461,7 @@
                             <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> 友達を追加/更新
                         </button>
                     </div>
-                    <p class="text-[11px] text-slate-400 mb-3">
-                        ポイントを競い合ったり、友達の相棒をタップして「いいね（応援）」を送ろう！
-                    </p>
-                    <div id="friendLeaderboard" class="space-y-2.5">
-                        <!-- JSで描画 -->
-                    </div>
+                    <div id="friendLeaderboard" class="space-y-2.5"></div>
                 </div>
 
                 <!-- コイン交換ショップ -->
@@ -435,7 +491,6 @@
             { stage: 4, name: '伝説の星神龍（最終進化）', emoji: '👑', reqLevel: 999, reqStones: 999, desc: '数々のクエストを乗り越えた究極の守護神！' }
         ];
 
-        // --- 育成アイテムマスター ---
         const ITEM_MASTER = {
             shard: { id: 'shard', name: 'ほしのカケラ', emoji: '✨', exp: 35, hp: 5, desc: 'EXP+35 / げんき+5' },
             fruit: { id: 'fruit', name: 'にじいろ果実', emoji: '🍎', exp: 80, hp: 25, desc: 'EXP+80 / げんき+25' },
@@ -448,6 +503,13 @@
             hard:   { label: '★3 難しい', coins: 80, score: 120, hpPenalty: 35, color: 'text-amber-400 bg-amber-500/10 border-amber-500/30' }
         };
 
+        const TIMER_CHEERS = [
+            '「いい調子！スマホを置いて目の前のことに集中しよう！」',
+            '「キミが頑張ってるパワーが僕にも伝わってくるよ！」',
+            '「あと少し！最後までやり切ったらレアアイテムが落ちるかも…！」',
+            '「深呼吸してリラックス。一歩ずつ進めば大丈夫！」'
+        ];
+
         const DAY_MS = 24 * 60 * 60 * 1000;
 
         // --- 初期状態 ---
@@ -456,6 +518,7 @@
             playerName: 'あなた',
             scorePt: 120,
             coins: 100,
+            totalFocusMinutes: 0,
             isHungryDebuff: false,
             activeTab: 'habits',
             partner: {
@@ -466,35 +529,47 @@
                 maxHp: 100
             },
             inventory: { shard: 2, fruit: 1, stone: 0 },
-            // 周期習慣チャレンジ
             habits: [
                 {
                     id: 1001,
-                    title: '英単語や勉強を15分進める',
-                    intervalDays: 2,     // 2日ごと（1日おき）
-                    durationDays: 14,    // 14日間チャレンジ
+                    title: '英単語や勉強を集中して進める',
+                    requiredMinutes: 15,
+                    timerUnlocked: false,
+                    intervalDays: 2,
+                    durationDays: 14,
                     startDate: Date.now(),
-                    nextAvailableAt: Date.now(), // 今すぐ挑戦可能
+                    nextAvailableAt: Date.now(),
                     completedCount: 0,
                     streak: 0,
                     difficulty: 'normal'
+                },
+                {
+                    id: 1002,
+                    title: '【お試し】1分だけ集中タイマーを体験する',
+                    requiredMinutes: 1,
+                    timerUnlocked: false,
+                    intervalDays: 1,
+                    durationDays: 7,
+                    startDate: Date.now(),
+                    nextAvailableAt: Date.now(),
+                    completedCount: 0,
+                    streak: 0,
+                    difficulty: 'easy'
                 }
             ],
-            // 単発クエスト
             tasks: [
-                { id: 1, title: '相棒に「ほしのカケラ」を1つあげてみる', difficulty: 'easy', status: 'active' }
+                { id: 1, title: '机の上を10分かけてスッキリ片付ける', requiredMinutes: 10, timerUnlocked: false, difficulty: 'easy', status: 'active' }
             ],
-            // フレンド一覧（初期サンプルライバル1名入り）
             friends: [
                 {
                     id: 'sample_rival_1',
                     name: 'ライバルのハルカ（見本）',
-                    scorePt: 240,
+                    scorePt: 260,
+                    totalFocusMinutes: 90,
                     stageIndex: 1,
                     level: 4,
                     streakMax: 3,
-                    likes: 2,
-                    updatedAt: Date.now()
+                    likes: 2
                 }
             ],
             rewards: [
@@ -505,14 +580,31 @@
             ]
         };
 
-        let state = JSON.parse(localStorage.getItem('questPartnerState_v2')) || DEFAULT_STATE;
+        let state = JSON.parse(localStorage.getItem('questPartnerState_v3')) || DEFAULT_STATE;
+
+        // --- タイマー制御用変数 ---
+        let activeTimer = {
+            intervalId: null,
+            type: null, // 'habit' or 'task'
+            targetId: null,
+            totalSeconds: 0,
+            remainingSeconds: 0,
+            isPaused: false
+        };
 
         function saveState() {
-            localStorage.setItem('questPartnerState_v2', JSON.stringify(state));
+            localStorage.setItem('questPartnerState_v3', JSON.stringify(state));
         }
 
         function getNextLevelExp(level) {
             return level * 100;
+        }
+
+        function formatFocusTime(totalMins) {
+            if (!totalMins || totalMins <= 0) return '0分';
+            const h = Math.floor(totalMins / 60);
+            const m = totalMins % 60;
+            return h > 0 ? `${h}時間${m}分` : `${m}分`;
         }
 
         function showToast(message, icon = '✨', bgClass = 'bg-slate-800 border-indigo-500/50') {
@@ -525,7 +617,132 @@
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-2');
                 setTimeout(() => toast.remove(), 300);
-            }, 3200);
+            }, 3400);
+        }
+
+        // --- 集中タイマー起動・制御ロジック ---
+        function startFocusTimer(type, id) {
+            let item = type === 'habit'
+                ? state.habits.find(h => h.id === id)
+                : state.tasks.find(t => t.id === id);
+
+            if (!item || !item.requiredMinutes) return;
+
+            const stageInfo = PARTNER_STAGES[state.partner.stageIndex];
+            document.getElementById('timerTargetTitle').textContent = item.title;
+            document.getElementById('timerPartnerEmoji').textContent = stageInfo.emoji;
+            document.getElementById('timerPartnerCheer').textContent = TIMER_CHEERS[0];
+
+            activeTimer.type = type;
+            activeTimer.targetId = id;
+            activeTimer.totalSeconds = item.requiredMinutes * 60;
+            activeTimer.remainingSeconds = item.requiredMinutes * 60;
+            activeTimer.isPaused = false;
+
+            const pauseBtn = document.getElementById('timerPauseBtn');
+            pauseBtn.innerHTML = `<i data-lucide="pause" class="w-4 h-4"></i> 一時停止`;
+
+            updateTimerUI();
+
+            const modal = document.getElementById('focusTimerModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+
+            if (activeTimer.intervalId) clearInterval(activeTimer.intervalId);
+            activeTimer.intervalId = setInterval(tickTimer, 1000);
+        }
+
+        function tickTimer() {
+            if (activeTimer.isPaused) return;
+
+            activeTimer.remainingSeconds--;
+            updateTimerUI();
+
+            // 15秒ごとに相棒の応援セリフを変更
+            if (activeTimer.remainingSeconds > 0 && activeTimer.remainingSeconds % 15 === 0) {
+                const cheer = TIMER_CHEERS[Math.floor(Math.random() * TIMER_CHEERS.length)];
+                document.getElementById('timerPartnerCheer').textContent = cheer;
+            }
+
+            if (activeTimer.remainingSeconds <= 0) {
+                finishFocusTimer();
+            }
+        }
+
+        function updateTimerUI() {
+            const mins = Math.floor(activeTimer.remainingSeconds / 60);
+            const secs = activeTimer.remainingSeconds % 60;
+            const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            document.getElementById('timerDisplay').textContent = formatted;
+
+            const elapsed = activeTimer.totalSeconds - activeTimer.remainingSeconds;
+            const pct = activeTimer.totalSeconds > 0 ? Math.min(100, Math.round((elapsed / activeTimer.totalSeconds) * 100)) : 100;
+            document.getElementById('timerProgressBar').style.width = `${pct}%`;
+        }
+
+        function togglePauseTimer() {
+            activeTimer.isPaused = !activeTimer.isPaused;
+            const pauseBtn = document.getElementById('timerPauseBtn');
+            if (activeTimer.isPaused) {
+                pauseBtn.innerHTML = `<i data-lucide="play" class="w-4 h-4"></i> 再開する`;
+                document.getElementById('timerPartnerCheer').textContent = '「休憩中だね。準備ができたら再開しよう！」';
+            } else {
+                pauseBtn.innerHTML = `<i data-lucide="pause" class="w-4 h-4"></i> 一時停止`;
+                document.getElementById('timerPartnerCheer').textContent = '「おかえり！残り時間も一緒に頑張ろう！」';
+            }
+            lucide.createIcons();
+        }
+
+        function giveUpTimer() {
+            if (!confirm('途中でギブアップするとタイマーがリセットされ、相棒のげんき（HP）が5減少します。本当にやめますか？')) return;
+
+            clearInterval(activeTimer.intervalId);
+            activeTimer.intervalId = null;
+
+            const modal = document.getElementById('focusTimerModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+
+            state.partner.hp = Math.max(0, state.partner.hp - 5);
+            document.getElementById('partnerSpeech').textContent = '「途中で終わっちゃった…次は最後までやり切ろうね！」';
+            showToast('タイマーをギブアップしました…（相棒HP -5）', '💦', 'bg-rose-950 border-rose-500');
+
+            if (state.partner.hp === 0) triggerDownPenalty();
+            saveState();
+            render();
+        }
+
+        function finishFocusTimer() {
+            clearInterval(activeTimer.intervalId);
+            activeTimer.intervalId = null;
+
+            const modal = document.getElementById('focusTimerModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+
+            let item = activeTimer.type === 'habit'
+                ? state.habits.find(h => h.id === activeTimer.targetId)
+                : state.tasks.find(t => t.id === activeTimer.targetId);
+
+            if (item) {
+                item.timerUnlocked = true;
+                const mins = item.requiredMinutes || 0;
+                state.totalFocusMinutes = (state.totalFocusMinutes || 0) + mins;
+
+                // 集中時間ボーナス
+                const bonusScore = mins * 2;
+                const bonusCoins = Math.max(5, Math.floor(mins / 2));
+                state.scorePt += bonusScore;
+                state.coins += bonusCoins;
+
+                confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
+                showToast(`⏱ ${mins}分完走！達成ロック解除＆集中ボーナス(+${bonusScore}pt / +${bonusCoins}Coin)！`, '🔓', 'bg-cyan-950 border-cyan-400');
+                document.getElementById('partnerSpeech').textContent = `「${mins}分間お疲れさま！達成ボタンのロックが解除されたよ！」`;
+            }
+
+            saveState();
+            render();
         }
 
         // --- メインタブ切り替え ---
@@ -556,6 +773,7 @@
             const stageInfo = PARTNER_STAGES[p.stageIndex];
             const nextExp = getNextLevelExp(p.level);
 
+            document.getElementById('totalFocusText').textContent = formatFocusTime(state.totalFocusMinutes);
             document.getElementById('scorePtText').textContent = state.scorePt;
             document.getElementById('coinText').textContent = state.coins;
 
@@ -568,7 +786,6 @@
                 debuffBadge.classList.remove('flex');
             }
 
-            // 相棒ステータス
             document.getElementById('partnerStageBadge').textContent = `STAGE ${stageInfo.stage}`;
             document.getElementById('partnerName').textContent = stageInfo.name;
             document.getElementById('partnerLevelBadge').textContent = `Lv. ${p.level}`;
@@ -600,10 +817,11 @@
             lucide.createIcons();
         }
 
-        // --- ① 周期習慣チャレンジの追加・描画・達成 ---
+        // --- ① 周期習慣チャレンジ ---
         document.getElementById('habitForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const title = document.getElementById('habitTitleInput').value.trim();
+            const requiredMinutes = parseInt(document.getElementById('habitMinutesInput').value, 10);
             const intervalDays = parseInt(document.getElementById('habitIntervalInput').value, 10);
             const durationDays = parseInt(document.getElementById('habitDurationInput').value, 10);
             const difficulty = document.getElementById('habitDifficultyInput').value;
@@ -612,17 +830,19 @@
             state.habits.unshift({
                 id: Date.now(),
                 title,
+                requiredMinutes,
+                timerUnlocked: requiredMinutes === 0,
                 intervalDays,
                 durationDays,
                 startDate: Date.now(),
-                nextAvailableAt: Date.now(), // 初回はすぐ挑戦できる
+                nextAvailableAt: Date.now(),
                 completedCount: 0,
                 streak: 0,
                 difficulty
             });
 
             document.getElementById('habitTitleInput').value = '';
-            showToast(`「${title}」の${durationDays}日間チャレンジを開始しました！`, '🔥');
+            showToast(`「${title}」のチャレンジを開始しました！`, '🔥');
             saveState();
             render();
         });
@@ -635,11 +855,7 @@
             let readyCount = 0;
 
             if (state.habits.length === 0) {
-                listEl.innerHTML = `
-                    <div class="glass-card rounded-2xl p-8 text-center text-slate-400">
-                        <p class="text-sm font-bold mb-1">まだ習慣チャレンジがありません</p>
-                        <p class="text-xs text-slate-500">上のフォームから「何日おきに・何日間続けるか」を決めて登録しよう！</p>
-                    </div>`;
+                listEl.innerHTML = `<div class="glass-card rounded-2xl p-8 text-center text-slate-400 text-xs">上のフォームから集中タイマー時間と周期を決めて登録しよう！</div>`;
             }
 
             state.habits.forEach(habit => {
@@ -649,39 +865,42 @@
                 const isReady = !isFinishedAll && now >= habit.nextAvailableAt;
                 if (isReady) readyCount++;
 
-                // 残り待機時間の計算
+                const needsTimer = (habit.requiredMinutes || 0) > 0;
+                const isUnlocked = !needsTimer || habit.timerUnlocked;
+
                 let statusBadge = '';
                 if (isFinishedAll) {
                     statusBadge = `<span class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-black">👑 期間コンプリート！</span>`;
                 } else if (isReady) {
-                    statusBadge = `<span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-black animate-pulse">🔥 今日のチャレンジ可能！</span>`;
+                    statusBadge = isUnlocked
+                        ? `<span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-black">🔓 達成ロック解除済み！</span>`
+                        : `<span class="px-2.5 py-1 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-xs font-black">⏱ ${habit.requiredMinutes}分タイマー必須</span>`;
                 } else {
                     const diffMs = habit.nextAvailableAt - now;
                     const hoursLeft = Math.ceil(diffMs / (1000 * 60 * 60));
                     const timeText = hoursLeft >= 24 ? `あと約${Math.ceil(hoursLeft / 24)}日後に復活` : `あと約${hoursLeft}時間後に復活`;
-                    statusBadge = `<span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 text-xs font-bold">⏳ 休息期間中（${timeText}）</span>`;
+                    statusBadge = `<span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 text-xs font-bold">⏳ 休息中（${timeText}）</span>`;
                 }
 
                 const progressPct = Math.min(100, Math.round((habit.completedCount / totalTargetCount) * 100));
 
                 const card = document.createElement('div');
                 card.className = `glass-card rounded-2xl p-4 sm:p-5 transition border ${
-                    isReady ? 'border-indigo-500/50 shadow-lg shadow-indigo-950/30' : 'border-slate-800/80 opacity-85'
+                    isReady ? 'border-indigo-500/50 shadow-lg' : 'border-slate-800/80 opacity-85'
                 }`;
 
                 card.innerHTML = `
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                         <div class="flex flex-wrap items-center gap-1.5">
                             <span class="text-[11px] font-bold px-2 py-0.5 rounded border ${diff.color}">${diff.label}</span>
-                            <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">${habit.intervalDays}日ごと / 計${habit.durationDays}日間</span>
-                            ${habit.streak > 0 ? `<span class="text-[11px] font-black text-orange-400">🔥 ${habit.streak}連続達成中</span>` : ''}
+                            <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">${habit.intervalDays}日ごと / 計${habit.durationDays}日</span>
+                            ${habit.streak > 0 ? `<span class="text-[11px] font-black text-orange-400">🔥 ${habit.streak}連続</span>` : ''}
                         </div>
                         ${statusBadge}
                     </div>
 
                     <h3 class="text-base font-black text-white mb-3">${escapeHTML(habit.title)}</h3>
 
-                    <!-- チャレンジ期間全体の進捗バー -->
                     <div class="mb-3">
                         <div class="flex justify-between text-[11px] font-bold text-slate-400 mb-1">
                             <span>期間達成度（${habit.completedCount} / ${totalTargetCount} 回クリア）</span>
@@ -698,19 +917,28 @@
                                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> 削除
                             </button>
                             ${!isReady && !isFinishedAll ? `
-                                <button onclick="forceReadyHabit(${habit.id})" class="text-[11px] text-slate-500 hover:text-indigo-300 underline ml-2" title="テストや前倒しで今すぐ挑戦する">
-                                    前倒しで今すぐ挑戦
+                                <button onclick="forceReadyHabit(${habit.id})" class="text-[11px] text-slate-500 hover:text-indigo-300 underline ml-2">
+                                    前倒し挑戦
                                 </button>
                             ` : ''}
                         </div>
 
-                        <div class="flex items-center gap-2">
+                        <div class="flex flex-wrap items-center gap-2">
                             ${isReady ? `
-                                <button onclick="completeHabit(${habit.id})" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black rounded-xl shadow flex items-center gap-1.5 transition transform active:scale-95">
-                                    <i data-lucide="check-circle-2" class="w-4 h-4"></i> 今回の挑戦クリア！（+${diff.score}pt）
-                                </button>
-                                <button onclick="failHabit(${habit.id})" class="px-3 py-2 bg-slate-800 hover:bg-rose-600/80 text-slate-300 hover:text-white text-xs font-bold rounded-xl border border-slate-700 transition">
-                                    サボった…
+                                ${!isUnlocked ? `
+                                    <button onclick="startFocusTimer('habit', ${habit.id})" class="px-4 py-2 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white text-xs font-black rounded-xl shadow flex items-center gap-1.5 transition transform active:scale-95">
+                                        <i data-lucide="play" class="w-3.5 h-3.5"></i> ${habit.requiredMinutes}分タイマー開始
+                                    </button>
+                                    <button disabled title="タイマーを完走するとロックが解除されます" class="px-3.5 py-2 bg-slate-800/80 text-slate-500 border border-slate-700/80 text-xs font-bold rounded-xl flex items-center gap-1 cursor-not-allowed">
+                                        <i data-lucide="lock" class="w-3.5 h-3.5"></i> 達成（ロック中）
+                                    </button>
+                                ` : `
+                                    <button onclick="completeHabit(${habit.id})" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black rounded-xl shadow flex items-center gap-1.5 transition transform active:scale-95 animate-bounce-short">
+                                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> 挑戦クリア！（+${diff.score}pt）
+                                    </button>
+                                `}
+                                <button onclick="failHabit(${habit.id})" class="px-2.5 py-2 bg-slate-800 hover:bg-rose-600/80 text-slate-400 hover:text-white text-xs font-bold rounded-xl border border-slate-700 transition">
+                                    サボった
                                 </button>
                             ` : ''}
                         </div>
@@ -731,28 +959,31 @@
         function completeHabit(id) {
             const habit = state.habits.find(h => h.id === id);
             if (!habit) return;
+            if ((habit.requiredMinutes || 0) > 0 && !habit.timerUnlocked) return;
 
             const diff = DIFFICULTY_CONFIG[habit.difficulty];
             habit.completedCount++;
             habit.streak++;
-            // 次回挑戦可能日時を「現在時刻 + 指定した間隔(日)」に設定
+            habit.timerUnlocked = (habit.requiredMinutes || 0) === 0; // 次回挑戦時は再度ロック
             habit.nextAvailableAt = Date.now() + (habit.intervalDays * DAY_MS);
 
-            // 連続ボーナス込みのスコア＆コイン加算
             const streakBonus = habit.streak * 10;
             const gainedScore = diff.score + streakBonus;
             state.scorePt += gainedScore;
             state.coins += diff.coins;
 
-            // アイテムドロップ
+            // アイテムドロップ（長時間集中するほどレア確率アップ）
             state.inventory.shard++;
             let dropMsg = 'ほしのカケラ×1';
-            if (habit.difficulty === 'hard' || habit.streak % 3 === 0) {
+            if ((habit.requiredMinutes || 0) >= 25 || habit.difficulty === 'hard' || habit.streak % 3 === 0) {
                 state.inventory.fruit++;
                 dropMsg += '・にじいろ果実×1';
             }
+            if ((habit.requiredMinutes || 0) >= 45) {
+                state.inventory.stone++;
+                dropMsg += '・進化の秘石×1';
+            }
 
-            // 期間コンプリートボーナス
             const totalTargetCount = Math.max(1, Math.ceil(habit.durationDays / habit.intervalDays));
             if (habit.completedCount >= totalTargetCount) {
                 state.inventory.stone++;
@@ -761,10 +992,10 @@
                 showToast(`🎊 期間コンプリート！進化の秘石×1 ＆ +300pt獲得！`, '👑', 'bg-amber-900/95 border-amber-400');
             } else {
                 confetti({ particleCount: 45, spread: 60, origin: { y: 0.7 } });
-                showToast(`習慣クリア！+${gainedScore}pt（連続ボーナス+${streakBonus}）＆ ${dropMsg}`, '🔥', 'bg-emerald-900/90 border-emerald-400');
+                showToast(`習慣クリア！+${gainedScore}pt ＆ ${dropMsg}`, '🔥', 'bg-emerald-900/90 border-emerald-400');
             }
 
-            document.getElementById('partnerSpeech').textContent = `「${habit.streak}回連続クリアすごい！次は${habit.intervalDays}日後にまた挑戦しようね！」`;
+            document.getElementById('partnerSpeech').textContent = `「${habit.streak}回連続クリアすごい！次は${habit.intervalDays}日後にまた頑張ろう！」`;
             saveState();
             render();
         }
@@ -772,12 +1003,11 @@
         function failHabit(id) {
             const habit = state.habits.find(h => h.id === id);
             if (!habit) return;
-
             const diff = DIFFICULTY_CONFIG[habit.difficulty];
             habit.streak = 0;
+            habit.timerUnlocked = (habit.requiredMinutes || 0) === 0;
             habit.nextAvailableAt = Date.now() + (habit.intervalDays * DAY_MS);
 
-            // ダメージ演出
             const app = document.getElementById('appContainer');
             app.classList.remove('animate-shake');
             void app.offsetWidth;
@@ -790,8 +1020,7 @@
 
             state.partner.hp = Math.max(0, state.partner.hp - diff.hpPenalty);
             state.scorePt = Math.max(0, state.scorePt - 20);
-            document.getElementById('partnerSpeech').textContent = `「連続記録が途切れちゃった…次は${habit.intervalDays}日後にリベンジしよう！」`;
-            showToast(`習慣サボりペナルティ…相棒のHP -${diff.hpPenalty} / スコア -20pt`, '💔', 'bg-rose-950/90 border-rose-500');
+            showToast(`習慣サボりペナルティ…相棒HP -${diff.hpPenalty} / スコア -20pt`, '💔', 'bg-rose-950/90 border-rose-500');
 
             if (state.partner.hp === 0) triggerDownPenalty();
             saveState();
@@ -812,14 +1041,22 @@
             render();
         }
 
-        // --- ② 単発クエスト関連 ---
+        // --- ② 単発クエスト ---
         document.getElementById('taskForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const title = document.getElementById('taskTitleInput').value.trim();
+            const requiredMinutes = parseInt(document.getElementById('taskMinutesInput').value, 10);
             const difficulty = document.getElementById('taskDifficultyInput').value;
             if (!title) return;
 
-            state.tasks.unshift({ id: Date.now(), title, difficulty, status: 'active' });
+            state.tasks.unshift({
+                id: Date.now(),
+                title,
+                requiredMinutes,
+                timerUnlocked: requiredMinutes === 0,
+                difficulty,
+                status: 'active'
+            });
             document.getElementById('taskTitleInput').value = '';
             saveState();
             render();
@@ -837,19 +1074,32 @@
             state.tasks.forEach(task => {
                 const diff = DIFFICULTY_CONFIG[task.difficulty];
                 const isDone = task.status !== 'active';
+                const needsTimer = (task.requiredMinutes || 0) > 0;
+                const isUnlocked = !needsTimer || task.timerUnlocked;
+
                 const card = document.createElement('div');
-                card.className = `glass-card rounded-xl p-4 flex items-center justify-between gap-3 ${isDone ? 'opacity-50' : ''}`;
+                card.className = `glass-card rounded-xl p-4 flex flex-wrap items-center justify-between gap-3 ${isDone ? 'opacity-50' : ''}`;
                 card.innerHTML = `
-                    <div class="space-y-1">
-                        <div class="flex items-center gap-2">
+                    <div class="space-y-1 flex-1 min-w-[200px]">
+                        <div class="flex flex-wrap items-center gap-2">
                             <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${diff.color}">${diff.label}</span>
+                            ${needsTimer ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">⏱ ${task.requiredMinutes}分必須</span>` : ''}
                             <span class="text-[11px] font-bold text-indigo-300">+${diff.score}pt</span>
                         </div>
                         <p class="text-sm font-bold ${isDone ? 'line-through text-slate-400' : 'text-white'}">${escapeHTML(task.title)}</p>
                     </div>
                     <div class="flex items-center gap-1.5 shrink-0">
                         ${task.status === 'active' ? `
-                            <button onclick="completeTask(${task.id})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg">達成</button>
+                            ${!isUnlocked ? `
+                                <button onclick="startFocusTimer('task', ${task.id})" class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-black rounded-lg flex items-center gap-1">
+                                    <i data-lucide="play" class="w-3 h-3"></i> ${task.requiredMinutes}分開始
+                                </button>
+                                <button disabled class="px-2.5 py-1.5 bg-slate-800 text-slate-500 text-xs font-bold rounded-lg flex items-center gap-1 cursor-not-allowed">
+                                    <i data-lucide="lock" class="w-3 h-3"></i> ロック中
+                                </button>
+                            ` : `
+                                <button onclick="completeTask(${task.id})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg">達成！</button>
+                            `}
                             <button onclick="failTask(${task.id})" class="px-2.5 py-1.5 bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white text-xs font-bold rounded-lg">失敗</button>
                         ` : `
                             <button onclick="deleteTask(${task.id})" class="p-1.5 text-slate-500 hover:text-slate-300"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
@@ -863,12 +1113,14 @@
         function completeTask(id) {
             const task = state.tasks.find(t => t.id === id);
             if (!task || task.status !== 'active') return;
+            if ((task.requiredMinutes || 0) > 0 && !task.timerUnlocked) return;
+
             task.status = 'completed';
             const diff = DIFFICULTY_CONFIG[task.difficulty];
             state.coins += diff.coins;
             state.scorePt += diff.score;
             state.inventory.shard++;
-            if (task.difficulty === 'hard') state.inventory.stone++;
+            if (task.difficulty === 'hard' || (task.requiredMinutes || 0) >= 30) state.inventory.stone++;
 
             confetti({ particleCount: 40, spread: 55, origin: { y: 0.7 } });
             showToast(`クエスト達成！+${diff.score}pt / +${diff.coins}Coin`, '🎉');
@@ -882,7 +1134,7 @@
             task.status = 'failed';
             const diff = DIFFICULTY_CONFIG[task.difficulty];
             state.partner.hp = Math.max(0, state.partner.hp - diff.hpPenalty);
-            showToast(`クエスト失敗…相棒のHP -${diff.hpPenalty}`, '💔', 'bg-rose-950/90 border-rose-500');
+            showToast(`クエスト失敗…相棒HP -${diff.hpPenalty}`, '💔', 'bg-rose-950/90 border-rose-500');
             if (state.partner.hp === 0) triggerDownPenalty();
             saveState();
             render();
@@ -894,19 +1146,19 @@
             render();
         }
 
-        // --- ③ フレンドランキング＆相棒お披露目機能 ---
+        // --- ③ フレンドランキング＆相棒お披露目 ---
         function renderFriends() {
             const container = document.getElementById('friendLeaderboard');
             container.innerHTML = '';
 
             const maxStreak = state.habits.reduce((max, h) => Math.max(max, h.streak || 0), 0);
 
-            // 自分とフレンドを合体させてスコア順にソート
             const allMembers = [
                 {
                     id: state.playerId,
                     name: `${state.playerName}（自分）`,
                     scorePt: state.scorePt,
+                    totalFocusMinutes: state.totalFocusMinutes || 0,
                     stageIndex: state.partner.stageIndex,
                     level: state.partner.level,
                     streakMax: maxStreak,
@@ -930,15 +1182,14 @@
                 row.innerHTML = `
                     <div class="flex items-center gap-3 min-w-0">
                         <span class="text-base font-black w-6 text-center shrink-0">${rankIcon}</span>
-                        <!-- 友達の相棒アイコン -->
                         <div class="w-11 h-11 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-2xl shrink-0 relative" title="${stage.name}">
                             ${stage.emoji}
-                            <span class="absolute -bottom-1 -right-1 px-1.5 py-0.2 bg-slate-800 border border-slate-600 rounded text-[9px] font-black text-amber-400">Lv.${member.level}</span>
+                            <span class="absolute -bottom-1 -right-1 px-1.5 bg-slate-800 border border-slate-600 rounded text-[9px] font-black text-amber-400">Lv.${member.level}</span>
                         </div>
                         <div class="min-w-0">
                             <p class="text-xs font-black text-white truncate">${escapeHTML(member.name)}</p>
-                            <p class="text-[10px] text-slate-400 truncate">相棒：${stage.name}</p>
-                            <p class="text-[10px] text-orange-400 font-bold">最大連続記録：${member.streakMax || 0}回</p>
+                            <p class="text-[10px] text-cyan-300 font-bold">累計集中：${formatFocusTime(member.totalFocusMinutes)}</p>
+                            <p class="text-[10px] text-slate-400 truncate">相棒：${stage.name} / 連続${member.streakMax || 0}回</p>
                         </div>
                     </div>
 
@@ -959,7 +1210,7 @@
             const friend = state.friends.find(f => f.id === friendId);
             if (!friend) return;
             friend.likes = (friend.likes || 0) + 1;
-            state.coins += 5; // 応援すると自分にも5コイン
+            state.coins += 5;
             showToast(`${friend.name}の相棒を応援した！（+5 Coin）`, '💖');
             saveState();
             render();
@@ -971,11 +1222,11 @@
                 id: state.playerId,
                 name: state.playerName,
                 scorePt: state.scorePt,
+                totalFocusMinutes: state.totalFocusMinutes || 0,
                 stageIndex: state.partner.stageIndex,
                 level: state.partner.level,
                 streakMax: maxStreak
             };
-            // 日本語を含むJSONを安全にBase64エンコード
             const jsonStr = JSON.stringify(payload);
             const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
             return 'QP_' + encoded;
@@ -1032,19 +1283,11 @@
 
                 const existingIdx = state.friends.findIndex(f => f.id === data.id);
                 if (existingIdx >= 0) {
-                    state.friends[existingIdx] = {
-                        ...state.friends[existingIdx],
-                        ...data,
-                        updatedAt: Date.now()
-                    };
-                    showToast(`「${data.name}」の最新データに更新しました！`, '🔄', 'bg-indigo-900 border-indigo-400');
+                    state.friends[existingIdx] = { ...state.friends[existingIdx], ...data };
+                    showToast(`「${data.name}」の最新データに更新しました！`, '🔄');
                 } else {
-                    state.friends.push({
-                        ...data,
-                        likes: 0,
-                        updatedAt: Date.now()
-                    });
-                    showToast(`「${data.name}」をフレンドに追加しました！`, '🎉', 'bg-emerald-900 border-emerald-400');
+                    state.friends.push({ ...data, likes: 0 });
+                    showToast(`「${data.name}」をフレンドに追加しました！`, '🎉');
                 }
 
                 document.getElementById('friendCodeInput').value = '';
@@ -1052,11 +1295,11 @@
                 render();
                 closeFriendModal();
             } catch (e) {
-                showToast('コードの読み取りに失敗しました。文字が途中で切れていないか確認してください。', '⚠️', 'bg-rose-950 border-rose-500');
+                showToast('コードの読み取りに失敗しました', '⚠️', 'bg-rose-950 border-rose-500');
             }
         }
 
-        // --- 相棒育成＆インベントリ・ショップ関連 ---
+        // --- 相棒育成＆インベントリ・ショップ ---
         function renderInventory() {
             const grid = document.getElementById('inventoryGrid');
             grid.innerHTML = '';
@@ -1091,7 +1334,7 @@
                 state.partner.level++;
                 state.partner.maxHp += 10;
                 state.partner.hp = state.partner.maxHp;
-                state.scorePt += 50; // レベルアップでも競争ポイント加算
+                state.scorePt += 50;
                 confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
                 showToast(`相棒が Lv.${state.partner.level} に成長！（+50pt）`, '🎉');
             }
@@ -1108,7 +1351,7 @@
             state.inventory.stone -= stageInfo.reqStones;
             p.stageIndex++;
             p.hp = p.maxHp;
-            state.scorePt += 200; // 進化ボーナスポイント
+            state.scorePt += 200;
 
             const nextStage = PARTNER_STAGES[p.stageIndex];
             document.getElementById('evolvePreviewIcon').textContent = nextStage.emoji;
@@ -1130,7 +1373,7 @@
 
         function petPartner() {
             const stageInfo = PARTNER_STAGES[state.partner.stageIndex];
-            document.getElementById('partnerSpeech').textContent = `「進化条件は Lv.${stageInfo.reqLevel} と 進化の秘石×${stageInfo.reqStones} だよ！友達にも自慢しよう！」`;
+            document.getElementById('partnerSpeech').textContent = `「進化条件は Lv.${stageInfo.reqLevel} と 進化の秘石×${stageInfo.reqStones} だよ！」`;
             const btn = document.getElementById('partnerAvatarBtn');
             btn.classList.remove('animate-bounce-short');
             void btn.offsetWidth;
