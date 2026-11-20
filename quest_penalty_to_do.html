@@ -43,7 +43,7 @@
                 </div>
                 <div class="flex flex-col items-center">
                     <div class="w-16 h-16 animate-float" style="animation-delay:0.6s" id="titlePreviewIkemen"></div>
-                    <span class="text-[10px] font-black text-indigo-600 mt-1">✨ イケメン</span>
+                    <span class="text-[10px] font-black text-indigo-600 mt-1">💻 イケメン</span>
                 </div>
             </div>
 
@@ -91,7 +91,7 @@
                             <span class="text-[11px] font-black mt-1">でぶ</span>
                         </button>
                         <button type="button" onclick="selectNewSpecies('ikemen')" class="sp-opt p-2 rounded-xl border border-slate-200 flex flex-col items-center">
-                            <span class="text-xl">✨</span>
+                            <span class="text-xl">💻</span>
                             <span class="text-[11px] font-black mt-1">イケメン</span>
                         </button>
                     </div>
@@ -154,9 +154,9 @@
                             <option value="1">1分（お試し体験）</option>
                             <option value="10">10分集中</option>
                             <option value="15" selected>15分集中</option>
-                            <option value="25">25分集中（🎁果実ボーナス！）</option>
-                            <option value="45">45分集中（💎秘石＋果実ボーナス！）</option>
-                            <option value="60">60分ガッツリ（👑秘石×2＋果実×2！）</option>
+                            <option value="25">25分集中（🧪幻の薬ボーナス！）</option>
+                            <option value="45">45分集中（🎮Switch5＋幻の薬！）</option>
+                            <option value="60">60分ガッツリ（👑Switch5×2＋幻の薬×2！）</option>
                             <option value="0">タイマーなし（※報酬少なめ）</option>
                         </select>
                     </div>
@@ -214,7 +214,7 @@
                         <button onclick="updatePlayerName()" class="px-2.5 py-1 bg-indigo-600 text-white text-xs font-bold rounded-lg">変更</button>
                     </div>
                 </div>
-                <p class="text-[11px] text-slate-500">① 自分のコードをコピーして友達に送ろう！</p>
+                <p class="text-[11px] text-slate-500">① 自分のプロフィールコードをコピーして友達に送ろう！</p>
                 <div class="flex gap-2">
                     <input type="text" id="myShareCode" readonly class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-[11px] font-mono">
                     <button onclick="copyMyShareCode()" class="px-4 py-2 bg-emerald-600 text-white text-xs font-black rounded-xl">コピー</button>
@@ -227,6 +227,44 @@
                     <button onclick="importFriendCode()" class="px-4 py-2 bg-indigo-600 text-white text-xs font-black rounded-xl">登録</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- ⑤ フレンド詳細プロフィールモーダル（NEW!） -->
+    <div id="profileModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-indigo-200 text-center space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                <span class="text-xs font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">👤 プレイヤープロフィール</span>
+                <button onclick="closeProfileModal()" class="text-slate-400 hover:text-slate-700 text-xl font-black px-2">✕</button>
+            </div>
+
+            <div class="bg-gradient-to-b from-sky-50 to-indigo-50/60 rounded-2xl p-4 border border-indigo-100">
+                <div id="profPartnerSvg" class="w-28 h-28 mx-auto animate-float"></div>
+                <h3 id="profPlayerName" class="text-xl font-black text-slate-800 mt-2">プレイヤー名</h3>
+                <p id="profPartnerTitle" class="text-xs font-extrabold text-indigo-600">相棒の肩書き Lv.1</p>
+            </div>
+
+            <!-- 実績4項目グリッド -->
+            <div class="grid grid-cols-2 gap-3 text-left">
+                <div class="bg-orange-50 border border-orange-100 p-3 rounded-2xl">
+                    <p class="text-[10px] font-extrabold text-orange-700">🔥 連続達成記録</p>
+                    <p id="profStreakText" class="text-lg font-black text-orange-900">0 日連続</p>
+                </div>
+                <div class="bg-emerald-50 border border-emerald-100 p-3 rounded-2xl">
+                    <p class="text-[10px] font-extrabold text-emerald-700">🏅 達成ミッション数</p>
+                    <p id="profTotalDoneText" class="text-lg font-black text-emerald-900">0 回達成</p>
+                </div>
+                <div class="bg-cyan-50 border border-cyan-100 p-3 rounded-2xl">
+                    <p class="text-[10px] font-extrabold text-cyan-700">⏱ 累計集中時間</p>
+                    <p id="profFocusText" class="text-lg font-black text-cyan-900">0 分</p>
+                </div>
+                <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-2xl">
+                    <p class="text-[10px] font-extrabold text-indigo-700">🏆 トータルスコア</p>
+                    <p id="profScoreText" class="text-lg font-black text-indigo-900">0 pt</p>
+                </div>
+            </div>
+
+            <div id="profCheerArea" class="pt-1"></div>
         </div>
     </div>
 
@@ -330,7 +368,7 @@
                     <svg viewBox="0 0 64 64" class="w-11 h-11 shrink-0"><circle cx="32" cy="34" r="22" fill="#e0f2fe" stroke="#0284c7" stroke-width="3"/><polyline points="32,20 32,34 42,38" fill="none" stroke="#0284c7" stroke-width="3.5" stroke-linecap="round"/><rect x="26" y="6" width="12" height="5" rx="2" fill="#38bdf8"/></svg>
                     <div>
                         <p class="text-xs sm:text-sm font-black text-slate-800">長時間タイマーほど豪華アイテムボーナス！</p>
-                        <p class="text-[11px] text-slate-500">25分以上で「にじいろ果実」、45分以上で「進化の秘石」も確定ゲット！</p>
+                        <p class="text-[11px] text-slate-500">25分以上で「🧪幻の薬」、45分以上で「🎮Switch５」も確定ゲット！</p>
                     </div>
                 </div>
                 <button onclick="openAddModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-xl shadow flex items-center gap-1 shrink-0">
@@ -360,7 +398,7 @@
                     <span class="text-xs font-extrabold text-slate-500">相棒タイプ切替：</span>
                     <button onclick="changePartnerSpecies('ojisan')" id="spBtn-ojisan" class="px-3 py-1 rounded-full text-xs font-black border">👔 おじさん</button>
                     <button onclick="changePartnerSpecies('debu')" id="spBtn-debu" class="px-3 py-1 rounded-full text-xs font-black border">🍔 でぶ</button>
-                    <button onclick="changePartnerSpecies('ikemen')" id="spBtn-ikemen" class="px-3 py-1 rounded-full text-xs font-black border">✨ イケメン</button>
+                    <button onclick="changePartnerSpecies('ikemen')" id="spBtn-ikemen" class="px-3 py-1 rounded-full text-xs font-black border">💻 イケメン</button>
                 </div>
 
                 <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-black mb-2">
@@ -371,7 +409,7 @@
 
                 <div class="max-w-sm mx-auto py-6 px-4 rounded-3xl bg-gradient-to-b from-sky-50 to-amber-50/50 border border-indigo-100 flex flex-col items-center">
                     <div id="partnerSpeech" class="mb-4 px-4 py-2 rounded-2xl bg-white border border-slate-200 text-xs font-bold text-slate-700 shadow-sm">
-                        「タイマーを完走してエサをくれると嬉しいな！」
+                        「タイマーを完走してポテチや幻の薬をくれると嬉しいな！」
                     </div>
                     <button onclick="petPartner()" class="w-40 h-40 flex items-center justify-center animate-float cursor-pointer">
                         <div id="mainPartnerSvg" class="w-36 h-36"></div>
@@ -439,7 +477,7 @@
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
                     <div>
                         <h2 class="text-lg font-black text-slate-800">🏆 フレンドランキング＆相棒広場</h2>
-                        <p class="text-xs text-slate-500">みんながどの相棒（おじさん・でぶ・イケメン）を育てているか見てみよう！</p>
+                        <p class="text-xs text-slate-500">カードをタップでプロフィール詳細！エールを送るとお互いに報酬ゲット！</p>
                     </div>
                     <button onclick="openFriendModal()" class="px-4 py-2.5 bg-emerald-600 text-white text-xs font-black rounded-xl shadow">
                         🤝 コード共有 / 友達追加
@@ -455,7 +493,7 @@
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
                     <div>
                         <h2 class="text-lg font-black text-slate-800">🛍️ コイン交換ショップ</h2>
-                        <p class="text-xs text-slate-500">貯めたコインで育成アイテムや自分へのご褒美をゲット！</p>
+                        <p class="text-xs text-slate-500">貯めたコインでポテチ・幻の薬・Switch５や自分ご褒美をゲット！</p>
                     </div>
                     <button onclick="addCustomReward()" class="px-3.5 py-2 bg-indigo-50 text-indigo-600 text-xs font-black rounded-xl">
                         ＋ 自分ご褒美を作る
@@ -467,7 +505,7 @@
     </div>
 
     <script>
-        // ================= Web Audio API サウンドエンジン =================
+        // ================= Web Audio API サウンドエンジン（BGM音量アップ！） =================
         const Sound = {
             ctx: null, enabled: false, bgmInterval: null, step: 0,
             init() {
@@ -477,7 +515,7 @@
                 }
                 if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
             },
-            tone(freq, dur, type = 'sine', vol = 0.08, delay = 0) {
+            tone(freq, dur, type = 'sine', vol = 0.12, delay = 0) {
                 if (!this.enabled || !this.ctx) return;
                 const now = this.ctx.currentTime + delay;
                 const osc = this.ctx.createOscillator();
@@ -488,11 +526,11 @@
                 osc.connect(gain); gain.connect(this.ctx.destination);
                 osc.start(now); osc.stop(now + dur);
             },
-            click() { this.tone(660, 0.08, 'sine', 0.07); },
-            start() { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => this.tone(f, 0.15, 'triangle', 0.09, i * 0.08)); },
-            feed() { this.tone(587.33, 0.1, 'sine', 0.1, 0); this.tone(880, 0.18, 'sine', 0.1, 0.08); },
-            fanfare() { [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => this.tone(f, 0.25, 'triangle', 0.11, i * 0.1)); },
-            damage() { this.tone(220, 0.2, 'sawtooth', 0.07, 0); this.tone(165, 0.3, 'sawtooth', 0.07, 0.15); },
+            click() { this.tone(660, 0.08, 'sine', 0.1); },
+            start() { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => this.tone(f, 0.15, 'triangle', 0.13, i * 0.08)); },
+            feed() { this.tone(587.33, 0.1, 'sine', 0.13, 0); this.tone(880, 0.18, 'sine', 0.13, 0.08); },
+            fanfare() { [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => this.tone(f, 0.25, 'triangle', 0.14, i * 0.1)); },
+            damage() { this.tone(220, 0.2, 'sawtooth', 0.1, 0); this.tone(165, 0.3, 'sawtooth', 0.1, 0.15); },
             startBgm() {
                 this.stopBgm();
                 if (!this.enabled) return;
@@ -500,9 +538,10 @@
                 this.step = 0;
                 this.bgmInterval = setInterval(() => {
                     if (!this.enabled) return;
-                    this.tone(notes[this.step % notes.length], 0.55, 'sine', 0.025, 0);
+                    // BGM音量を大幅にアップ（0.025 -> 0.095, triangle波形で温かみのある音色に）
+                    this.tone(notes[this.step % notes.length], 0.58, 'triangle', 0.095, 0);
                     this.step++;
-                }, 650);
+                }, 620);
             },
             stopBgm() { if (this.bgmInterval) { clearInterval(this.bgmInterval); this.bgmInterval = null; } }
         };
@@ -528,8 +567,8 @@
                 icon: '👔',
                 label: 'おじさん',
                 stages: [
-                    { stage: 1, name: '後頭部限界はげおじさん', reqLevel: 3, reqStones: 1, desc: '満員電車と残業に耐える哀愁漂う42歳新人。', speech: '「はぁ…腰が痛いけど、キミが頑張るなら俺もやるよ…」' },
-                    { stage: 2, name: 'やる気が出た課長代理おじさん', reqLevel: 7, reqStones: 2, desc: '栄養ドリンクをキメて少し背筋が伸びた中年エース。', speech: '「おっ、いい集中力だね！帰りに缶コーヒーおごろうか？」' },
+                    { stage: 1, name: '後頭部限界突破はげおじさん', reqLevel: 3, reqStones: 1, desc: '長年のストレスで頭頂部が完全に限界突破した愛嬌たっぷりおじさん。', speech: '「ピカーン！おでこの広さは努力の証じゃ！一緒に頑張ろう！」' },
+                    { stage: 2, name: 'やる気が出た課長代理おじさん', reqLevel: 7, reqStones: 2, desc: '育毛トニックと栄養ドリンクで少し背筋が伸びた中年エース。', speech: '「おっ、いい集中力だね！帰りにポテチおごろうか？」' },
                     { stage: 3, name: 'ダンディ敏腕部長おじさん', reqLevel: 12, reqStones: 3, desc: 'ロマンスグレーの髪とキレのあるスーツを着こなすイケオジ。', speech: '「君のその継続力、うちの部署にヘッドハンティングしたいよ！」' },
                     { stage: 4, name: '伝説の黄金会長おじさん（最終出世）', reqLevel: 999, reqStones: 999, desc: '努力の末に頂点へ上り詰めた黄金スーツのカリスマ会長！', speech: '「ワハハ！君の努力は100億円の価値があるぞ！」' }
                 ]
@@ -538,18 +577,18 @@
                 icon: '🍔',
                 label: 'でぶ',
                 stages: [
-                    { stage: 1, name: 'ポテチ大好き食いしん坊でぶ', reqLevel: 3, reqStones: 1, desc: 'コーラとポテチを片手にゴロゴロしている愛嬌たっぷりボディ。', speech: '「ムシャムシャ…タイマー終わったら一緒におやつ食べようぜ…」' },
+                    { stage: 1, name: 'ポテチ大好き食いしん坊でぶ', reqLevel: 3, reqStones: 1, desc: 'コーラとポテチを片手にゴロゴロしている愛嬌たっぷりボディ。', speech: '「ムシャムシャ…タイマー終わったら一緒にポテチ食べようぜ…」' },
                     { stage: 2, name: '汗だくウォーキングでぶ', reqLevel: 7, reqStones: 2, desc: 'ハチマキを巻いて一念発起！脂肪を燃やし始めた熱血ボディ。', speech: '「ハァハァ…キミが勉強してる間に俺も10km歩いたぞ！」' },
                     { stage: 3, name: 'プロレスラー級ガチムチヘビー級', reqLevel: 12, reqStones: 3, desc: '脂肪がすべて分厚い筋肉に変わった圧倒的パワーファイター！', speech: '「フンッ！今の俺ならどんな難しい課題もラリアットで粉砕だ！」' },
                     { stage: 4, name: '伝説の無敗大横綱（最終進化）', reqLevel: 999, reqStones: 999, desc: '心・技・体を極めた相撲界の頂点！貫禄と優しさの塊。', speech: '「どすこい！キミの毎日の努力、見事な横綱相撲だったぞ！」' }
                 ]
             },
             ikemen: {
-                icon: '✨',
+                icon: '💻',
                 label: 'イケメン',
                 stages: [
-                    { stage: 1, name: 'パソコンかたかた部男子主将', reqLevel: 3, reqStones: 1, desc: '目元が前髪で隠れているが、実は原石の美少年。', speech: '「ぼ、僕なんかが応援してもアレだけど…一緒に頑張ろう…」' },
-                    { stage: 2, name: '垢抜けた爽やかクラスの中心', reqLevel: 7, reqStones: 2, desc: '髪を切って笑顔が眩しくなった！女子からモテ始めた好青年。', speech: '「おっ、今日も集中してるね！その調子、すごくカッコいいよ！」' },
+                    { stage: 1, name: 'パソコンかたかた部男子主将', reqLevel: 3, reqStones: 1, desc: 'メガネを光らせながら高速タイピングで課題を片付ける知的クール主将。', speech: '「カタカタッ…エンター！よし、キミの集中効率も最適化したよ。」' },
+                    { stage: 2, name: '垢抜けた爽やかクラスの人気者', reqLevel: 7, reqStones: 2, desc: 'PCを閉じて外に出たら笑顔が眩しすぎた！女子からモテ始めた好青年。', speech: '「おっ、今日も集中してるね！その調子、すごくカッコいいよ！」' },
                     { stage: 3, name: '学園の生徒会長プリンス', reqLevel: 12, reqStones: 3, desc: '薔薇の花びらが舞う完璧超人！知性と気品を兼ね備えた王子様。', speech: '「君の努力する瞳は、どんな宝石よりも美しく輝いているよ。」' },
                     { stage: 4, name: '銀河系スーパーアイドル（最終進化）', reqLevel: 999, reqStones: 999, desc: '全宇宙を魅了する伝説のトップスター！キラキラオーラ全開。', speech: '「今日のライブはキミのためだけに歌うよ！最高に愛してるぜ！」' }
                 ]
@@ -562,18 +601,21 @@
             // --- 1. おじさんルート ---
             if (sp === 'ojisan') {
                 if (idx === 0) {
+                    // 後頭部限界突破はげおじさん（頭頂部ツルピカ＋光沢＋側頭部残し毛）
                     return `<svg viewBox="0 0 120 120" class="w-full h-full">
                         <ellipse cx="60" cy="110" rx="28" ry="5" fill="#cbd5e1" opacity="0.6"/>
                         <path d="M32 108 L36 74 Q60 68 84 74 L88 108 Z" fill="#64748b" stroke="#334155" stroke-width="3"/>
                         <polygon points="60,74 55,96 60,102 65,96" fill="#94a3b8"/>
-                        <circle cx="60" cy="48" r="24" fill="#fed7aa" stroke="#ea580c" stroke-width="2.5"/>
-                        <path d="M44 26 Q60 22 76 26" fill="none" stroke="#334155" stroke-width="2.5"/>
-                        <path d="M48 23 Q60 19 72 23" fill="none" stroke="#334155" stroke-width="2"/>
-                        <circle cx="51" cy="46" r="3" fill="#1e293b"/><circle cx="69" cy="46" r="3" fill="#1e293b"/>
-                        <path d="M46 51 Q51 54 56 51" fill="none" stroke="#9a3412" stroke-width="1.5"/>
-                        <path d="M64 51 Q69 54 74 51" fill="none" stroke="#9a3412" stroke-width="1.5"/>
-                        <path d="M53 60 Q60 56 67 60" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
-                        <path d="M84 34 Q88 42 84 46 Q80 42 84 34" fill="#38bdf8"/>
+                        <!-- 側頭部のフサフサ残し毛 -->
+                        <circle cx="34" cy="48" r="8" fill="#475569"/>
+                        <circle cx="86" cy="48" r="8" fill="#475569"/>
+                        <!-- 限界突破のツヤツヤ頭頂部 -->
+                        <circle cx="60" cy="46" r="25" fill="#fed7aa" stroke="#ea580c" stroke-width="2.5"/>
+                        <ellipse cx="52" cy="30" rx="8" ry="4" fill="#ffffff" opacity="0.85" transform="rotate(-15 52 30)"/>
+                        <!-- キラッとする光沢 -->
+                        <path d="M74 22 L76 28 L82 30 L76 32 L74 38 L72 32 L66 30 L72 28 Z" fill="#facc15"/>
+                        <circle cx="51" cy="48" r="3" fill="#1e293b"/><circle cx="69" cy="48" r="3" fill="#1e293b"/>
+                        <path d="M52 60 Q60 65 68 60" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
                     </svg>`;
                 }
                 if (idx === 1) {
@@ -615,7 +657,6 @@
             // --- 2. でぶルート ---
             if (sp === 'debu') {
                 if (idx === 0) {
-                    // ポテチ大好き食いしん坊でぶ
                     return `<svg viewBox="0 0 120 120" class="w-full h-full">
                         <ellipse cx="60" cy="84" rx="44" ry="30" fill="#38bdf8" stroke="#0284c7" stroke-width="3"/>
                         <circle cx="60" cy="46" r="28" fill="#fed7aa" stroke="#ea580c" stroke-width="2.5"/>
@@ -627,7 +668,6 @@
                     </svg>`;
                 }
                 if (idx === 1) {
-                    // ハチマキ汗だくウォーキングでぶ
                     return `<svg viewBox="0 0 120 120" class="w-full h-full">
                         <ellipse cx="60" cy="86" rx="40" ry="28" fill="#f97316" stroke="#c2410c" stroke-width="3"/>
                         <circle cx="60" cy="46" r="26" fill="#fed7aa" stroke="#ea580c" stroke-width="2.5"/>
@@ -640,7 +680,6 @@
                     </svg>`;
                 }
                 if (idx === 2) {
-                    // プロレスラー級ガチムチヘビー級
                     return `<svg viewBox="0 0 120 120" class="w-full h-full">
                         <path d="M16 106 Q20 62 60 62 Q100 62 104 106 Z" fill="#fdba74" stroke="#c2410c" stroke-width="3"/>
                         <path d="M36 66 L48 106 L72 106 L84 66" fill="#ef4444" stroke="#991b1b" stroke-width="2.5"/>
@@ -650,7 +689,6 @@
                         <path d="M50 50 Q60 45 70 50" fill="none" stroke="#1e293b" stroke-width="3"/>
                     </svg>`;
                 }
-                // 伝説の無敗大横綱（最終進化）
                 return `<svg viewBox="0 0 120 120" class="w-full h-full">
                     <circle cx="60" cy="60" r="54" fill="#fef3c7" opacity="0.7"/>
                     <ellipse cx="60" cy="84" rx="44" ry="30" fill="#fed7aa" stroke="#b45309" stroke-width="3"/>
@@ -666,16 +704,23 @@
 
             // --- 3. イケメンルート ---
             if (idx === 0) {
-                // 前髪長めのボサボサ陰キャ男子
+                // パソコンかたかた部男子主将（メガネ＋ノートPC＋高速タイピング！）
                 return `<svg viewBox="0 0 120 120" class="w-full h-full">
-                    <path d="M34 108 L40 72 Q60 68 80 72 L86 108 Z" fill="#475569" stroke="#1e293b" stroke-width="3"/>
-                    <circle cx="60" cy="48" r="23" fill="#ffedd5" stroke="#fdba74" stroke-width="2"/>
-                    <path d="M34 52 Q36 18 60 18 Q84 18 86 52 L76 46 L68 54 L60 44 L52 54 L44 46 Z" fill="#1e293b"/>
-                    <path d="M54 60 Q60 58 66 60" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M34 96 L40 66 Q60 62 80 66 L86 96 Z" fill="#1e293b" stroke="#0f172a" stroke-width="2.5"/>
+                    <circle cx="60" cy="42" r="21" fill="#ffedd5" stroke="#fb923c" stroke-width="2"/>
+                    <path d="M38 38 Q40 16 60 16 Q80 16 82 38 L72 28 L60 32 L48 28 Z" fill="#312e81"/>
+                    <!-- 知的メガネ -->
+                    <rect x="44" y="38" width="12" height="8" rx="2" fill="#e0f2fe" stroke="#1e293b" stroke-width="2"/>
+                    <rect x="64" y="38" width="12" height="8" rx="2" fill="#e0f2fe" stroke="#1e293b" stroke-width="2"/>
+                    <line x1="56" y1="42" x2="64" y2="42" stroke="#1e293b" stroke-width="2"/>
+                    <path d="M54 53 Q60 56 66 53" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round"/>
+                    <!-- ノートパソコン -->
+                    <polygon points="32,74 88,74 82,104 38,104" fill="#94a3b8" stroke="#334155" stroke-width="2.5"/>
+                    <circle cx="60" cy="89" r="4" fill="#38bdf8"/>
+                    <rect x="24" y="104" width="72" height="5" rx="2" fill="#475569"/>
                 </svg>`;
             }
             if (idx === 1) {
-                // 垢抜けた爽やかクラスの人気者
                 return `<svg viewBox="0 0 120 120" class="w-full h-full">
                     <path d="M32 108 L38 72 Q60 68 82 72 L88 108 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="3"/>
                     <polygon points="52,72 60,84 68,72" fill="#ffffff"/>
@@ -687,7 +732,6 @@
                 </svg>`;
             }
             if (idx === 2) {
-                // 学園の生徒会長プリンス
                 return `<svg viewBox="0 0 120 120" class="w-full h-full">
                     <path d="M28 108 L36 70 Q60 66 84 70 L92 108 Z" fill="#ffffff" stroke="#6366f1" stroke-width="3"/>
                     <path d="M46 70 L60 94 L74 70" fill="#fef08a" stroke="#eab308" stroke-width="2"/>
@@ -699,7 +743,6 @@
                     <circle cx="88" cy="46" r="6" fill="#f43f5e"/>
                 </svg>`;
             }
-            // 銀河系スーパーアイドル（最終進化）
             return `<svg viewBox="0 0 120 120" class="w-full h-full">
                 <circle cx="60" cy="60" r="54" fill="#e0e7ff" opacity="0.8"/>
                 <polygon points="22,26 25,34 33,34 27,39 29,47 22,42 15,47 17,39 11,34 19,34" fill="#facc15"/>
@@ -715,20 +758,45 @@
         }
 
         // タイトル画面プレビューセット
-        document.getElementById('titlePreviewOjisan').innerHTML = getPartnerSvg('ojisan', 1);
+        document.getElementById('titlePreviewOjisan').innerHTML = getPartnerSvg('ojisan', 0);
         document.getElementById('titlePreviewDebu').innerHTML = getPartnerSvg('debu', 0);
-        document.getElementById('titlePreviewIkemen').innerHTML = getPartnerSvg('ikemen', 2);
+        document.getElementById('titlePreviewIkemen').innerHTML = getPartnerSvg('ikemen', 0);
 
+        // ================= アイテムイラスト（ポテチ・幻の薬・Switch５） =================
         function getItemSvg(id) {
-            if (id === 'shard') return '<svg viewBox="0 0 64 64" class="w-10 h-10 mx-auto"><polygon points="32,6 39,24 58,24 43,36 48,54 32,43 16,54 21,36 6,24 25,24" fill="#fde047" stroke="#eab308" stroke-width="3"/></svg>';
-            if (id === 'fruit') return '<svg viewBox="0 0 64 64" class="w-10 h-10 mx-auto"><path d="M32 18 C20 18, 12 28, 14 42 C16 54, 26 58, 32 56 C38 58, 48 54, 50 42 C52 28, 44 18, 32 18 Z" fill="#fb7185" stroke="#e11d48" stroke-width="3"/><path d="M32 18 Q36 8 44 10 Q40 18 32 18" fill="#4ade80"/></svg>';
-            return '<svg viewBox="0 0 64 64" class="w-10 h-10 mx-auto"><polygon points="32,6 52,22 44,56 20,56 12,22" fill="#38bdf8" stroke="#0284c7" stroke-width="3"/></svg>';
+            if (id === 'shard') {
+                // 🍟 ポテチ（黄色いポテトチップス袋）
+                return `<svg viewBox="0 0 64 64" class="w-10 h-10 mx-auto">
+                    <rect x="14" y="10" width="36" height="44" rx="5" fill="#facc15" stroke="#ca8a04" stroke-width="3"/>
+                    <rect x="14" y="10" width="36" height="8" fill="#ef4444"/>
+                    <circle cx="32" cy="34" r="10" fill="#fef08a" stroke="#ea580c" stroke-width="2"/>
+                    <text x="32" y="37" font-size="8" font-weight="900" text-anchor="middle" fill="#b45309">CHIP</text>
+                </svg>`;
+            }
+            if (id === 'fruit') {
+                // 🧪 幻の薬（キラキラ光る虹色ポーション）
+                return `<svg viewBox="0 0 64 64" class="w-10 h-10 mx-auto">
+                    <rect x="26" y="8" width="12" height="8" rx="2" fill="#d97706"/>
+                    <rect x="24" y="16" width="16" height="6" rx="2" fill="#94a3b8"/>
+                    <circle cx="32" cy="40" r="18" fill="#f472b6" stroke="#db2777" stroke-width="3"/>
+                    <path d="M18 42 A14 14 0 0 0 46 42 Z" fill="#38bdf8"/>
+                    <circle cx="26" cy="32" r="3" fill="#ffffff" opacity="0.8"/>
+                </svg>`;
+            }
+            // 🎮 Switch５（次世代携帯ゲーム機イラスト）
+            return `<svg viewBox="0 0 64 64" class="w-10 h-10 mx-auto">
+                <rect x="6" y="18" width="10" height="28" rx="4" fill="#38bdf8" stroke="#0284c7" stroke-width="2"/>
+                <rect x="48" y="18" width="10" height="28" rx="4" fill="#fb7185" stroke="#e11d48" stroke-width="2"/>
+                <rect x="16" y="18" width="32" height="28" rx="2" fill="#1e293b" stroke="#0f172a" stroke-width="2.5"/>
+                <rect x="19" y="21" width="26" height="22" fill="#334155"/>
+                <text x="32" y="35" font-size="10" font-weight="900" text-anchor="middle" fill="#facc15">SW5</text>
+            </svg>`;
         }
 
         const ITEMS = {
             shard: { id: 'shard', name: 'ポテチ', exp: 35, hp: 5, desc: 'EXP+35 / HP+5' },
-            fruit: { id: 'fruit', name: '幻のドリンク', exp: 80, hp: 25, desc: 'EXP+80 / HP+25' },
-            stone: { id: 'stone', name: 'Switch5', exp: 50, hp: 10, desc: '進化素材 / EXP+50' }
+            fruit: { id: 'fruit', name: '幻の薬', exp: 80, hp: 25, desc: 'EXP+80 / HP+25' },
+            stone: { id: 'stone', name: 'Switch５', exp: 50, hp: 10, desc: '進化素材 / EXP+50' }
         };
 
         const DIFFS = {
@@ -741,6 +809,13 @@
         function getTodayKey() {
             const d = new Date();
             return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+
+        // ================= 連続達成日数＆合計達成数の計算ヘルパー =================
+        function getUserMetrics(acc) {
+            const maxStreak = (acc.habits || []).reduce((max, h) => Math.max(max, h.streak || 0), 0);
+            const totalCompleted = (acc.completedLogs || []).length;
+            return { maxStreak, totalCompleted };
         }
 
         // ================= マルチアカウント管理 =================
@@ -767,25 +842,25 @@
                     { id: 1, title: '机の上を10分かけてスッキリ片付ける', requiredMinutes: 10, timerUnlocked: false, difficulty: 'easy', status: 'active' }
                 ],
                 friends: [
-                    { id: 'rival1', name: '部長のタナカ（見本）', scorePt: 260, totalFocusMinutes: 90, species: 'ojisan', stageIndex: 2, level: 5, likes: 3 }
+                    { id: 'rival1', name: '部長のタナカ（見本）', scorePt: 260, totalFocusMinutes: 90, maxStreak: 5, totalCompleted: 8, species: 'ojisan', stageIndex: 2, level: 5, likes: 3 }
                 ],
                 rewards: [
-                    { id: 101, title: 'にじいろ果実 ×1（育成エサ）', cost: 60, type: 'item', itemId: 'fruit' },
-                    { id: 102, title: '進化の秘石 ×1（進化素材）', cost: 150, type: 'item', itemId: 'stone' },
+                    { id: 101, title: '幻の薬 ×1（育成アイテム）', cost: 60, type: 'item', itemId: 'fruit' },
+                    { id: 102, title: 'Switch５ ×1（進化アイテム）', cost: 150, type: 'item', itemId: 'stone' },
                     { id: 103, title: '好きなお菓子・ドリンクOK券', cost: 80, type: 'real' },
                     { id: 104, title: '動画・ゲーム30分満喫券', cost: 120, type: 'real' }
                 ]
             };
         }
 
-        let store = JSON.parse(localStorage.getItem('qp_multi_v3'));
+        let store = JSON.parse(localStorage.getItem('qp_multi_v4'));
         if (!store || !store.accounts || Object.keys(store.accounts).length === 0) {
             const firstId = 'u_' + Math.random().toString(36).slice(2, 9);
             store = {
                 activeAccountId: firstId,
                 accounts: { [firstId]: createDefaultUserData(firstId, 'プレイヤー1', 'ojisan') }
             };
-            localStorage.setItem('qp_multi_v3', JSON.stringify(store));
+            localStorage.setItem('qp_multi_v4', JSON.stringify(store));
         }
 
         let state = store.accounts[store.activeAccountId];
@@ -797,7 +872,7 @@
 
         function save() {
             store.accounts[store.activeAccountId] = state;
-            localStorage.setItem('qp_multi_v3', JSON.stringify(store));
+            localStorage.setItem('qp_multi_v4', JSON.stringify(store));
         }
 
         function renderAccountSelector() {
@@ -988,7 +1063,6 @@
             save(); render();
         }
 
-        // タイマー完走時の長時間ボーナス計算
         function finishTimer() {
             clearInterval(timerObj.id);
             document.getElementById('focusTimerModal').classList.replace('flex', 'hidden');
@@ -1001,7 +1075,6 @@
                 const today = getTodayKey();
                 state.dailyMinutes[today] = (state.dailyMinutes[today] || 0) + mins;
 
-                // 長時間完走ボーナス！
                 let bonusCoins = Math.max(5, Math.floor(mins / 2));
                 let bonusScore = mins * 2;
                 let bonusText = '';
@@ -1010,16 +1083,16 @@
                     bonusCoins += 60; bonusScore += 150;
                     state.inventory.stone += 2;
                     state.inventory.fruit += 2;
-                    bonusText = '【60分超ボーナス】秘石×2 ＆ 果実×2 ＆ +60Coin！';
+                    bonusText = '【60分超ボーナス】Switch５×2 ＆ 幻の薬×2 ＆ +60Coin！';
                 } else if (mins >= 45) {
                     bonusCoins += 35; bonusScore += 90;
                     state.inventory.stone += 1;
                     state.inventory.fruit += 1;
-                    bonusText = '【45分ボーナス】進化の秘石×1 ＆ 果実×1！';
+                    bonusText = '【45分ボーナス】Switch５×1 ＆ 幻の薬×1！';
                 } else if (mins >= 25) {
                     bonusCoins += 15; bonusScore += 40;
                     state.inventory.fruit += 1;
-                    bonusText = '【25分ボーナス】にじいろ果実×1 ゲット！';
+                    bonusText = '【25分ボーナス】幻の薬×1 ゲット！';
                 }
 
                 state.scorePt += bonusScore;
@@ -1084,8 +1157,8 @@
 
         function getTimeBonusBadge(mins) {
             if (mins >= 60) return '<span class="text-[10px] font-black bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">👑 超豪華ボーナス</span>';
-            if (mins >= 45) return '<span class="text-[10px] font-black bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full">💎 秘石＋果実特典</span>';
-            if (mins >= 25) return '<span class="text-[10px] font-black bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full">🍎 果実ボーナス</span>';
+            if (mins >= 45) return '<span class="text-[10px] font-black bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full">🎮 Switch５＋幻の薬</span>';
+            if (mins >= 25) return '<span class="text-[10px] font-black bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full">🧪 幻の薬ボーナス</span>';
             return '';
         }
 
@@ -1174,29 +1247,28 @@
             state.completedLogs.unshift({ title, minutes: mins, coins, dateStr });
         }
 
-        // 時間に応じた達成倍率＆追加アイテム計算
         function calcCompletionRewards(baseCoins, baseScore, mins, difficulty) {
             if (!mins || mins <= 0) {
                 return { coins: Math.max(5, Math.round(baseCoins * 0.35)), score: Math.max(10, Math.round(baseScore * 0.35)), extraMsg: '（タイマーなし少なめ報酬）' };
             }
             let mult = 1.0;
-            let extraMsg = ' ＆ 素材ゲット！';
+            let extraMsg = ' ＆ ポテチゲット！';
             state.inventory.shard++;
 
             if (mins >= 60) {
                 mult = 2.0;
                 state.inventory.stone += 2;
                 state.inventory.fruit += 2;
-                extraMsg = '【60分達成特典】報酬2倍＋秘石×2＋果実×2！';
+                extraMsg = '【60分達成特典】報酬2倍＋Switch５×2＋幻の薬×2！';
             } else if (mins >= 45) {
                 mult = 1.6;
                 state.inventory.stone += 1;
                 state.inventory.fruit += 1;
-                extraMsg = '【45分達成特典】報酬1.6倍＋秘石×1＋果実×1！';
+                extraMsg = '【45分達成特典】報酬1.6倍＋Switch５×1＋幻の薬×1！';
             } else if (mins >= 25) {
                 mult = 1.3;
                 state.inventory.fruit += 1;
-                extraMsg = '【25分達成特典】報酬1.3倍＋果実×1！';
+                extraMsg = '【25分達成特典】報酬1.3倍＋幻の薬×1！';
             } else if (difficulty === 'hard') {
                 state.inventory.fruit += 1;
             }
@@ -1377,46 +1449,164 @@
             Sound.click();
             const sp = SPECIES_DATA[state.partner.species] ? state.partner.species : 'ojisan';
             const st = SPECIES_DATA[sp].stages[state.partner.stageIndex];
-            document.getElementById('partnerSpeech').textContent = st.speech + '（次の進化: Lv.' + st.reqLevel + ' ＆ 秘石×' + st.reqStones + '）';
+            document.getElementById('partnerSpeech').textContent = st.speech + '（次の進化: Lv.' + st.reqLevel + ' ＆ Switch５×' + st.reqStones + '）';
         }
+
+        // ================= フレンドランキング・プロフィール詳細・相互エール報酬 =================
+        let currentLeaderboardList = [];
 
         function renderFriends() {
             const box = document.getElementById('friendLeaderboard');
             box.innerHTML = '';
+            const myMetrics = getUserMetrics(state);
+
             const localOthers = Object.values(store.accounts)
                 .filter(a => a.playerId !== state.playerId)
-                .map(a => ({ id: a.playerId, name: a.playerName + '（同端末）', scorePt: a.scorePt, totalFocusMinutes: a.totalFocusMinutes, species: SPECIES_DATA[a.partner.species] ? a.partner.species : 'ojisan', stageIndex: a.partner.stageIndex, level: a.partner.level, isMe: false }));
+                .map(a => {
+                    const m = getUserMetrics(a);
+                    return {
+                        id: a.playerId,
+                        name: a.playerName + '（同端末）',
+                        scorePt: a.scorePt,
+                        totalFocusMinutes: a.totalFocusMinutes,
+                        maxStreak: m.maxStreak,
+                        totalCompleted: m.totalCompleted,
+                        species: SPECIES_DATA[a.partner.species] ? a.partner.species : 'ojisan',
+                        stageIndex: a.partner.stageIndex,
+                        level: a.partner.level,
+                        likes: a.receivedLikes || 0,
+                        isMe: false,
+                        isLocal: true
+                    };
+                });
 
             const all = [
-                { id: state.playerId, name: state.playerName + '（あなた）', scorePt: state.scorePt, totalFocusMinutes: state.totalFocusMinutes, species: SPECIES_DATA[state.partner.species] ? state.partner.species : 'ojisan', stageIndex: state.partner.stageIndex, level: state.partner.level, isMe: true },
+                {
+                    id: state.playerId,
+                    name: state.playerName + '（あなた）',
+                    scorePt: state.scorePt,
+                    totalFocusMinutes: state.totalFocusMinutes,
+                    maxStreak: myMetrics.maxStreak,
+                    totalCompleted: myMetrics.totalCompleted,
+                    species: SPECIES_DATA[state.partner.species] ? state.partner.species : 'ojisan',
+                    stageIndex: state.partner.stageIndex,
+                    level: state.partner.level,
+                    isMe: true
+                },
                 ...localOthers,
-                ...state.friends
+                ...state.friends.map(f => ({
+                    ...f,
+                    maxStreak: f.maxStreak || 0,
+                    totalCompleted: f.totalCompleted || 0
+                }))
             ].sort((a, b) => b.scorePt - a.scorePt);
+
+            currentLeaderboardList = all;
 
             all.forEach((m, i) => {
                 const sp = SPECIES_DATA[m.species] ? m.species : 'ojisan';
                 const spObj = SPECIES_DATA[sp];
                 const st = spObj.stages[m.stageIndex] || spObj.stages[0];
                 const row = document.createElement('div');
-                row.className = 'p-3.5 rounded-2xl border flex items-center justify-between ' + (m.isMe ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-200');
-                row.innerHTML = '<div class="flex items-center gap-3"><span class="font-black text-base w-6">' + (i + 1) + '位</span>' +
-                    '<div class="w-12 h-12 rounded-2xl bg-sky-50 p-1 shrink-0">' + getPartnerSvg(sp, m.stageIndex) + '</div>' +
-                    '<div><p class="text-xs sm:text-sm font-black">' + esc(m.name) + ' <span class="text-amber-600">Lv.' + m.level + '</span></p>' +
-                    '<p class="text-[10px] font-bold text-slate-500">' + st.name + '</p>' +
-                    '<p class="text-[11px] text-cyan-700 font-bold">累計集中: ' + m.totalFocusMinutes + '分</p></div></div>' +
-                    '<div class="text-right"><p class="text-sm font-black text-indigo-600">' + m.scorePt + ' pt</p>' +
-                    (!m.isMe && !String(m.name).includes('同端末') ? '<button onclick="cheer(\'' + m.id + '\')" class="text-[10px] bg-pink-50 text-pink-600 px-2 py-0.5 rounded-full font-bold">❤️ 応援(' + (m.likes || 0) + ')</button>' : '') + '</div>';
+                row.className = 'p-3.5 rounded-2xl border flex items-center justify-between gap-2 transition hover:border-indigo-400 cursor-pointer ' + (m.isMe ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-200');
+                row.onclick = (e) => {
+                    if (e.target.closest('button')) return;
+                    openFriendProfile(i);
+                };
+                row.innerHTML =
+                    '<div class="flex items-center gap-3 min-w-0">' +
+                        '<span class="font-black text-base w-6 shrink-0">' + (i + 1) + '位</span>' +
+                        '<div class="w-12 h-12 rounded-2xl bg-sky-50 p-1 shrink-0">' + getPartnerSvg(sp, m.stageIndex) + '</div>' +
+                        '<div class="min-w-0">' +
+                            '<p class="text-xs sm:text-sm font-black truncate">' + esc(m.name) + ' <span class="text-amber-600">Lv.' + m.level + '</span></p>' +
+                            '<p class="text-[10px] font-bold text-slate-500 truncate">' + st.name + '</p>' +
+                            '<div class="flex flex-wrap items-center gap-2 mt-0.5 text-[10px] font-extrabold">' +
+                                '<span class="text-orange-600">🔥' + m.maxStreak + '日連続</span>' +
+                                '<span class="text-emerald-600">🏅' + m.totalCompleted + '回達成</span>' +
+                                '<span class="text-cyan-700">⏱' + m.totalFocusMinutes + '分</span>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="text-right shrink-0 flex flex-col items-end gap-1">' +
+                        '<p class="text-sm font-black text-indigo-600">' + m.scorePt + ' pt</p>' +
+                        (!m.isMe
+                            ? '<button onclick="sendYell(\'' + m.id + '\',' + (m.isLocal ? 'true' : 'false') + ')" class="text-[10px] bg-pink-500 hover:bg-pink-400 text-white px-2.5 py-1 rounded-full font-black shadow-sm">📣 エール (' + (m.likes || 0) + ')</button>'
+                            : '<span class="text-[10px] font-bold text-indigo-500">タップで詳細</span>') +
+                    '</div>';
                 box.appendChild(row);
             });
         }
-        function cheer(id) {
-            const f = state.friends.find(x => x.id === id);
-            if (f) { f.likes = (f.likes || 0) + 1; state.coins += 5; Sound.feed(); toast(f.name + 'を応援した！(+5 Coin)', '💖'); save(); render(); }
+
+        function openFriendProfile(index) {
+            const m = currentLeaderboardList[index];
+            if (!m) return;
+            Sound.click();
+            const sp = SPECIES_DATA[m.species] ? m.species : 'ojisan';
+            const spObj = SPECIES_DATA[sp];
+            const st = spObj.stages[m.stageIndex] || spObj.stages[0];
+
+            document.getElementById('profPartnerSvg').innerHTML = getPartnerSvg(sp, m.stageIndex);
+            document.getElementById('profPlayerName').textContent = m.name;
+            document.getElementById('profPartnerTitle').textContent = st.name + '（Lv.' + m.level + '）';
+            document.getElementById('profStreakText').textContent = (m.maxStreak || 0) + ' 日連続';
+            document.getElementById('profTotalDoneText').textContent = (m.totalCompleted || 0) + ' 回達成';
+            document.getElementById('profFocusText').textContent = (m.totalFocusMinutes || 0) + ' 分';
+            document.getElementById('profScoreText').textContent = (m.scorePt || 0) + ' pt';
+
+            const cheerArea = document.getElementById('profCheerArea');
+            if (!m.isMe) {
+                cheerArea.innerHTML = '<button onclick="sendYell(\'' + m.id + '\',' + (m.isLocal ? 'true' : 'false') + '); closeProfileModal();" class="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-black rounded-2xl shadow">📣 エールを送る（お互いに +10 Coin ＆ ポテチ！）</button>';
+            } else {
+                cheerArea.innerHTML = '<p class="text-[11px] text-slate-400 font-bold">このプロフィールデータは「コード共有」から友達に送れます！</p>';
+            }
+
+            document.getElementById('profileModal').classList.replace('hidden', 'flex');
         }
+        function closeProfileModal() { Sound.click(); document.getElementById('profileModal').classList.replace('flex', 'hidden'); }
+
+        // フレンドにエールを送ると互いに少しの報酬ゲット！
+        function sendYell(id, isLocal) {
+            if (isLocal) {
+                const targetAcc = store.accounts[id];
+                if (!targetAcc) return;
+                targetAcc.coins = (targetAcc.coins || 0) + 10;
+                targetAcc.inventory.shard = (targetAcc.inventory.shard || 0) + 1;
+                targetAcc.receivedLikes = (targetAcc.receivedLikes || 0) + 1;
+
+                state.coins += 10;
+                state.inventory.shard += 1;
+                Sound.feed();
+                toast(targetAcc.playerName + 'にエール！お互いに +10 Coin ＆ ポテチ×1！', '📣');
+                save(); render();
+                return;
+            }
+            const f = state.friends.find(x => x.id === id);
+            if (f) {
+                f.likes = (f.likes || 0) + 1;
+                f.scorePt = (f.scorePt || 0) + 10; // 相手側にも応援ボーナス反映
+                state.coins += 10;
+                state.inventory.shard += 1;
+                Sound.feed();
+                toast(f.name + 'にエール！互いに報酬（+10 Coin ＆ ポテチ×1）獲得！', '📣');
+                save(); render();
+            }
+        }
+
         function openFriendModal() {
             Sound.click();
             document.getElementById('playerNameInput').value = state.playerName;
-            const data = { id: state.playerId, name: state.playerName, scorePt: state.scorePt, totalFocusMinutes: state.totalFocusMinutes, species: state.partner.species || 'ojisan', stageIndex: state.partner.stageIndex, level: state.partner.level };
+            const myMetrics = getUserMetrics(state);
+            const data = {
+                id: state.playerId,
+                name: state.playerName,
+                scorePt: state.scorePt,
+                totalFocusMinutes: state.totalFocusMinutes,
+                maxStreak: myMetrics.maxStreak,
+                totalCompleted: myMetrics.totalCompleted,
+                species: state.partner.species || 'ojisan',
+                stageIndex: state.partner.stageIndex,
+                level: state.partner.level
+            };
             document.getElementById('myShareCode').value = 'QP_' + btoa(unescape(encodeURIComponent(JSON.stringify(data))));
             document.getElementById('friendModal').classList.replace('hidden', 'flex');
         }
@@ -1426,7 +1616,7 @@
             if (n) { state.playerName = n; Sound.click(); save(); render(); openFriendModal(); }
         }
         function copyMyShareCode() {
-            const inp = document.getElementById('myShareCode'); inp.select(); navigator.clipboard.writeText(inp.value); Sound.click(); toast('コピーしました！', '📋');
+            const inp = document.getElementById('myShareCode'); inp.select(); navigator.clipboard.writeText(inp.value); Sound.click(); toast('プロフィールコードをコピーしました！', '📋');
         }
         function importFriendCode() {
             const raw = document.getElementById('friendCodeInput').value.trim();
@@ -1434,10 +1624,16 @@
             try {
                 const d = JSON.parse(decodeURIComponent(escape(atob(raw.slice(3)))));
                 const idx = state.friends.findIndex(x => x.id === d.id);
-                if (idx >= 0) state.friends[idx] = d; else state.friends.push(d);
+                if (idx >= 0) {
+                    d.likes = state.friends[idx].likes || 0;
+                    state.friends[idx] = d;
+                } else {
+                    d.likes = 0;
+                    state.friends.push(d);
+                }
                 document.getElementById('friendCodeInput').value = '';
                 Sound.fanfare();
-                toast(d.name + 'を登録しました！', '🎉');
+                toast(d.name + 'のプロフィールを登録しました！', '🎉');
                 save(); render(); closeFriendModal();
             } catch (e) { toast('読み取り失敗', '⚠️'); }
         }
