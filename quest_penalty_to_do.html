@@ -637,13 +637,7 @@
 
 ---
 
-### 差し替え手順
 
-1. GitHubの編集画面（黒いコードエリア）をクリックし、`Ctrl + F`（Macは `Cmd + F`）で **`function getPartnerSvg`** を検索します。
-2. `function getPartnerSvg(species, idx) {` から、そのすぐ下にある `// タイトル画面プレビューセット` の直前の `}` までを選択します。
-3. 以下の新しい `getPartnerSvg` コードを上書き貼り付けして、**`Commit changes...`** を押してください！
-
-```javascript
         function getPartnerSvg(species, idx) {
             const sp = SPECIES_DATA[species] ? species : 'ojisan';
 
